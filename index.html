@@ -6,12 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.css">
     <link rel="stylesheet" href="style.css">
-    <title>RelationalGraph.AI</title>
+    <link rel="icon" href="data:,">
+    <title>MindNose</title>
 </head>
 
 <body>
     <div class="header" style="display: flex; align-items: center;">
-        <h1 id="title">RelationalGraph.AI</h1>
+        <h1 id="title">MindNose</h1>
         <div class="nodesearchercontainer">
             <p class="categorialabel">Categoria: </p>
             <select id="Categoria" name="Categoria">
@@ -62,7 +63,6 @@
                                 return 'ellipse'
                             }
                         },
-                        'star-sides': 5,
                         'label': 'data(title)',
                         'text-valign': 'center',
                         'text-halign': 'center',
@@ -107,7 +107,7 @@
         const SearchNodes = (termo) => {
             let categoria = document.getElementById('Categoria').value;
 
-            const url = `https://164.152.254.31:5001/api/RelationalGraphCore/Post/${categoria}/${termo}`;
+            const url = `https://rgraph.gsouza.dev/api/RelationalGraphCore/Post/${categoria}/${termo}`;
 
             fetch(url, {
                 method: "POST"
@@ -126,6 +126,7 @@
                     console.log(JSON.stringify(data.relationships, null, 2));
 
                     nodes.forEach(node => {
+                        console.log(node.id);
                         if (cy.getElementById(node.id).empty()) {
                             cy.add({
                                 data: {
