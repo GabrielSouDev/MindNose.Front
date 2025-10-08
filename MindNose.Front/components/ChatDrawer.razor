@@ -1,3 +1,4 @@
+@using ChatMessage = Models.IAChat.ChatMessage
 @inject MindNoseService MindNoseService
 
 <RadzenStack Style="height: 100%;">
@@ -5,11 +6,13 @@
         <div style="flex: 1; overflow-y: auto; padding: 10px; display:flex; flex-direction:column;">
             @foreach (var message in _chatMessage.Messages)
             {
-                @if (message.Origin == "system")
+                @if (message.Origin == IAChatOrigin.System)
                 {
                     <div style="width: 100%; display: flex; justify-content: flex-start;">
-                        <div style="background-color: palevioletred; color: white; width: fit-content; text-align: start; padding: 8px; border-radius: 10px; margin: 4px;">
-                            <p style="margin: 0;">@message.Text</p>
+                        <div style="background-color: palevioletred; color: white; 
+									width: fit-content; text-align: start; padding: 8px; 
+									border-radius: 10px; margin: 4px;">
+							<p style="margin: 0; white-space: pre-wrap;">@message.Text</p>
                             <p style="margin: 0; font-size: 0.8em;">IA Chat</p>
                         </div>
                     </div>
@@ -17,8 +20,10 @@
                 else
                 {
                     <div style="width: 100%; display: flex; justify-content: flex-end;">
-                        <div style="background-color: lightgreen; color: darkgreen; width: fit-content; text-align: end; padding: 8px; border-radius: 10px; margin: 4px;">
-                            <p style="margin: 0;">@message.Text</p>
+                        <div style="background-color: lightgreen; color: darkgreen; 
+									width: fit-content; text-align: end; padding: 8px; 
+									border-radius: 10px; margin: 4px;">
+							<p style="margin: 0; white-space: pre-wrap;">@message.Text</p>
                             <p style="margin: 0; font-size: 0.8em;">@message.Origin</p>
                         </div>
                     </div>
@@ -30,61 +35,70 @@
         <div style="padding: 10px; border-top: 1px solid #ccc;">
             <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Style="width:100%;">
                 <RadzenLabel Style="width:fit-content; white-space: nowrap;" Text="Select Model: " />
-                <RadzenDropDown @bind-Value=@_selectedModel Data="@_models" TextProperty="@nameof(ModelDTO.Name)" ValueProperty="@nameof(ModelDTO.Id)" Disabled="false" Style="width: 100%;" />
+                <RadzenDropDown @bind-Value=@_selectedModel Data="@_models" 
+					TextProperty="@nameof(ModelDTO.Name)" 
+					ValueProperty="@nameof(ModelDTO.Id)" 
+					Disabled="false" Style="width: 100%;" />
             </RadzenStack>
 
-            <RadzenTextArea Style="width: 100%;" />
-            <RadzenButton Text="Enviar" Style="margin-top: 10px; margin-bottom: 10px;" />
+			<RadzenTextArea Placeholder="Escreva sua mensagem." 
+				Value="@_textBox.Text" @oninput="e => _textBox.Text = e.Value?.ToString()" 
+				@onkeyup="HandleKeyUp" 
+				Style="width: 100%;" />
+            <RadzenButton Text="Enviar" Click="Submit"
+				Style="margin-top: 10px; margin-bottom: 10px;" />
         </div>
     </RadzenCard>
 </RadzenStack>
 
 @code{
-    private ChatMessage _chatMessage = new();
-    private List<ModelDTO>? _models = new();
-    private string _selectedModel = "mistralai/mistral-small-3.2-24b-instruct";
+	private Models.IAChat.ChatMessage _chatMessage = new();
+	private List<ModelDTO>? _models = new();
+	private string _selectedModel = "mistralai/mistral-small-3.2-24b-instruct";
+	private Message _textBox = new()
+	{
+		Text = string.Empty,
+		Origin = IAChatOrigin.User
+	};
+	private bool _preventDefaultEnter = false;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if(firstRender)
-        {
-            _models = await MindNoseService.GetModels();
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if(firstRender)
+		{
+			try
+			{
+				_models = await MindNoseService.GetModels();
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Erro ao realizar requisição:\n   {ex.Message}");
+				return;
+			}
 
-            StateHasChanged();
-        }
-    }
+			StateHasChanged();
+		}
+	}
 
-    protected override void OnInitialized()
-    {
-        for (int i = 0; i < 2; i++)
-        {
-            _chatMessage.Messages.Add(new Message{ Text = $"Message{i}" });
-        }
+	protected override void OnInitialized()
+	{
+		_chatMessage.Messages.Add(new Message { Text = "Bem-vindo ao MindNose!" });
+		_chatMessage.Messages.Add(new Message { Text = "Digite sua dúvida." });
+	}
 
-        for (int i = 0; i < 3; i++)
-        {
-            _chatMessage.Messages.Add(new Message { Text = $"Message{i}", Origin = "User" });
-        }
+	private void Submit()
+	{
+		if(!string.IsNullOrEmpty(_textBox.Text))
+			_chatMessage.Messages.Add(new Message { Text = _textBox.Text, Origin = IAChatOrigin.User });
 
-        for (int i = 0; i < 3; i++)
-        {
-            _chatMessage.Messages.Add(new Message { Text = $"Message{i}" });
-        }
+		_textBox.Text = string.Empty;
+	}
 
-        for (int i = 0; i < 1; i++)
-        {
-            _chatMessage.Messages.Add(new Message { Text = $"Message{i}", Origin = "User" });
-        }
-    }
-
-    public class ChatMessage
-    {
-        public List<Message> Messages { get; set; } = new();
-    }
-
-    public class Message
-    {
-        public string Text { get; set; } = string.Empty;
-        public string Origin { get; set; } = "system";
-    }
+	private void HandleKeyUp(KeyboardEventArgs args)
+	{
+		if (args.Key == "Enter" && !args.ShiftKey)
+		{
+			Submit();
+		}
+	}
 }
