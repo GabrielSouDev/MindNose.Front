@@ -8,12 +8,12 @@ namespace MindNose.Front.Services;
 public class CytoscapeService
 {
     private CytoscapeDTO _cytoscape;
-
+    private CytoscapeLayout _layout;
 
     public CytoscapeService()
     {
         _cytoscape = new();
-
+        _layout = CytoscapeLayout.cose;
     }
 
     public void AddElements(ElementsDTO elements)
@@ -26,6 +26,8 @@ public class CytoscapeService
                                                              .DistinctBy(n => n.Data.Id)
                                                              .ToList();
     }
-
     public ElementsDTO GetElements() => _cytoscape.Elements;
+
+    public CytoscapeLayout SetLayout(CytoscapeLayout newLayout) => _layout = newLayout;
+    public CytoscapeLayout GetLayout() => _layout;
 }

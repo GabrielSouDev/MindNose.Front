@@ -1,4 +1,5 @@
-﻿@inject IJSRuntime JS
+﻿@using MindNose.Front.Models.Enum
+@inject IJSRuntime JS
 @inject HttpClient client
 @inject CytoscapeService CytoscapeService
 
@@ -16,11 +17,11 @@
 
 <div style="display: flex; flex-direction:row; width: fit-content; text-align: center; align-items:center;">
 	<RadzenLabel Text="Layout:&nbsp;&nbsp;&nbsp;" />
-    <RadzenSelectBar  @bind-Value="_layout" @onclick="ChangeLayout" TValue="string">
+	<RadzenSelectBar @bind-Value="_layout" @onclick="ChangeLayout" TValue="CytoscapeLayout">
         <Items>
-            @foreach (var layoutOption in _layoutOptions)
+			@foreach (CytoscapeLayout layoutOption in Enum.GetValues(typeof(CytoscapeLayout)))
             {
-                <RadzenSelectBarItem Text="@layoutOption" Value="@layoutOption" Disabled="false" Visible="true" />
+				<RadzenSelectBarItem Text="@layoutOption.ToString()" Value="@layoutOption" Disabled="false" Visible="true" />
             }
         </Items>
     </RadzenSelectBar>
@@ -33,19 +34,16 @@
 	private string _term = "Javascript";
 	private string _model = "mistralai/mistral-small-3.2-24b-instruct";
 
-	private string _layout = "cose";
-	private List<string> _layoutOptions = new()
-    {
-		"cose", "grid", "circle", "concentric", "breadthfirst", "random"
-    };
+	private CytoscapeLayout _layout;
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)
 		{
 			var elements = CytoscapeService.GetElements();
+			_layout = CytoscapeService.GetLayout();
 
-			await JS.InvokeVoidAsync("cytoscapeInterop.init", Id, elements, _layout);
+			await JS.InvokeVoidAsync("cytoscapeInterop.init", Id, elements, _layout.ToString());
 			StateHasChanged();
 		}
 	}
@@ -87,7 +85,8 @@
 
 	private async Task ChangeLayout()
 	{
-		await JS.InvokeVoidAsync("cytoscapeInterop.relayout", Id, _layout);
+		CytoscapeService.SetLayout(_layout);
+		await JS.InvokeVoidAsync("cytoscapeInterop.relayout", Id, _layout.ToString());
 		StateHasChanged();
 	}
 }
