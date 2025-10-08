@@ -1,7 +1,6 @@
-﻿@using MindNose.Front.Models.Enum
-@inject IJSRuntime JS
-@inject HttpClient client
+﻿@inject IJSRuntime JS
 @inject CytoscapeService CytoscapeService
+@inject MindNoseService MindNoseService
 
 <div style="display: flex; flex-direction:row; text-align: center; align-items:center;">
     <RadzenLabel Text="Categoria: " />
@@ -58,28 +57,21 @@
 				term = _term,
 				llmModel = _model
 			};
-
-			var json = JsonConvert.SerializeObject(request);
-			var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-			var response = await client.PostAsync("api/MindNoseCore/CreateOrGetLink", content);
-
-			if(response.IsSuccessStatusCode)
+			ElementsDTO elements = new();
+			try
 			{
-				var responseContent = await response.Content.ReadAsStringAsync();   
-
-				var links = JsonConvert.DeserializeObject<CytoscapeDTO>(responseContent);
-
-				await JS.InvokeVoidAsync("cytoscapeInterop.add", Id, links.Elements);
-
-				CytoscapeService.AddElements(links.Elements);
-
-				StateHasChanged();
+				elements = await MindNoseService.CreateOrGetLink(request);
 			}
-			else
+			catch (Exception ex)
 			{
-				Console.WriteLine($"{response.StatusCode}: {response}");
+				Console.WriteLine($"Erro ao realizar requisição:\n   {ex.Message}");
+				return;
 			}
+
+			CytoscapeService.AddElements(elements);
+			await JS.InvokeVoidAsync("cytoscapeInterop.add", Id, elements);
+
+			StateHasChanged();
 		}
 	}
 
