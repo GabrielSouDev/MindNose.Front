@@ -1,0 +1,93 @@
+﻿@inject IJSRuntime JS
+@inject HttpClient client
+@inject CytoscapeService CytoscapeService
+
+<div style="display: flex; flex-direction:row; text-align: center; align-items:center;">
+    <RadzenLabel Text="Categoria: " />
+    <RadzenTextBox @bind-Value="_category" />
+
+    <RadzenLabel Text="Termo: " />
+    <RadzenTextBox @bind-Value="_term" />
+
+    <RadzenButton Click="Search" />
+</div>
+
+<div id="@Id" style="width:100%; height: 90%; border: 1px solid #ccc"></div>
+
+<div style="display: flex; flex-direction:row; width: fit-content; text-align: center; align-items:center;">
+	<RadzenLabel Text="Layout:&nbsp;&nbsp;&nbsp;" />
+    <RadzenSelectBar  @bind-Value="_layout" @onclick="ChangeLayout" TValue="string">
+        <Items>
+            @foreach (var layoutOption in _layoutOptions)
+            {
+                <RadzenSelectBarItem Text="@layoutOption" Value="@layoutOption" Disabled="false" Visible="true" />
+            }
+        </Items>
+    </RadzenSelectBar>
+</div>''
+
+@code {
+	[Parameter] public string Id { get; set; } = "cy";
+
+	private string _category = "Programação";
+	private string _term = "Javascript";
+	private string _model = "mistralai/mistral-small-3.2-24b-instruct";
+
+	private string _layout = "cose";
+	private List<string> _layoutOptions = new()
+    {
+		"cose", "grid", "circle", "concentric", "breadthfirst", "random"
+    };
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			var elements = CytoscapeService.GetElements();
+
+			await JS.InvokeVoidAsync("cytoscapeInterop.init", Id, elements, _layout);
+			StateHasChanged();
+		}
+	}
+
+	public async Task Search()
+	{
+		if (!string.IsNullOrEmpty(_category) && !string.IsNullOrEmpty(_term))
+		{
+			var request = new
+			{
+				category = _category,
+				term = _term,
+				llmModel = _model
+			};
+
+			var json = JsonConvert.SerializeObject(request);
+			var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+			var response = await client.PostAsync("api/MindNoseCore/CreateOrGetLink", content);
+
+			if(response.IsSuccessStatusCode)
+			{
+				var responseContent = await response.Content.ReadAsStringAsync();   
+
+				var links = JsonConvert.DeserializeObject<CytoscapeDTO>(responseContent);
+
+				await JS.InvokeVoidAsync("cytoscapeInterop.add", Id, links.Elements);
+
+				CytoscapeService.AddElements(links.Elements);
+
+				StateHasChanged();
+			}
+			else
+			{
+				Console.WriteLine($"{response.StatusCode}: {response}");
+			}
+		}
+	}
+
+	private async Task ChangeLayout()
+	{
+		await JS.InvokeVoidAsync("cytoscapeInterop.relayout", Id, _layout);
+		StateHasChanged();
+	}
+}
