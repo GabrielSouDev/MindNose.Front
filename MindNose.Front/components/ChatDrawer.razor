@@ -1,3 +1,5 @@
+@inject HttpClient client
+
 <RadzenStack Style="height: 100%;">
     <RadzenCard Style="height: 100%; display: flex; flex-direction: column;">
         <div style="flex: 1; overflow-y: auto; padding: 10px; display:flex; flex-direction:column;">
@@ -26,14 +28,31 @@
         </div>
 
         <div style="padding: 10px; border-top: 1px solid #ccc;">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Style="width:100%;">
+                <RadzenLabel Style="width:fit-content; white-space: nowrap;" Text="Select Model: " />
+                <RadzenDropDown @bind-Value=@_selectedModel Data="@_models" TextProperty="@nameof(ModelDTO.Name)" ValueProperty="@nameof(ModelDTO.Id)" Disabled="false" Style="width: 100%;" />
+            </RadzenStack>
+
             <RadzenTextArea Style="width: 100%;" />
-            <RadzenButton Text="Enviar" Style="margin-top: 10px;" />
+            <RadzenButton Text="Enviar" Style="margin-top: 10px; margin-bottom: 10px;" />
         </div>
     </RadzenCard>
 </RadzenStack>
 
 @code{
     private ChatMessage _chatMessage = new();
+    private List<ModelDTO>? _models = new();
+    private string _selectedModel = "mistralai/mistral-small-3.2-24b-instruct";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender)
+        {
+            _models = await client.GetFromJsonAsync<List<ModelDTO>>("api/Utils/GetModelsList");
+
+            StateHasChanged();
+        }
+    }
 
     protected override void OnInitialized()
     {
