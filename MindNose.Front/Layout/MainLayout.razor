@@ -1,14 +1,14 @@
 ﻿@inherits LayoutComponentBase
 
 <HeadContent>
-    <RadzenTheme Theme="material" />
+    <RadzenTheme Theme="Humanistic-Dark" />
 </HeadContent>
 
 <RadzenLayout Style="grid-template-columns: 1fr auto; grid-template-areas: 'rz-header rz-header' 'rz-body rz-sidebar'">
-    <RadzenHeader>
+    <RadzenHeader Style="height: 2vh;">
         <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center" Gap="1rem">
             <div style="display:flex; flex-direction: row; align-content:center; align-items:center; text-align:center; gap:50px;">
-                <RadzenLabel Style="padding-left: 25px;" Text="MindNose" />
+                <RadzenLabel Style="padding-left: 25px; font-size: x-large;" Text="MindNose" />
                 <NavMenu />
             </div>
 
@@ -19,15 +19,13 @@
     <RadzenSidebar style="width: 33vw;" @bind-Expanded="@sidebarExpanded">
         <ChatDrawer />
     </RadzenSidebar>
-    <RadzenBody>
-        <div class="rz-p-4">
-            @Body
-        </div>
+    <RadzenBody Style="height: 98vh; display: flex; flex-direction: column;">
+        @Body
     </RadzenBody>
 </RadzenLayout>
 
 <RadzenComponents />
 
 @code {
-    bool sidebarExpanded = true;
+    bool sidebarExpanded = false;
 }
