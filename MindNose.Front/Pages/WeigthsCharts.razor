@@ -1,0 +1,92 @@
+﻿@inject CytoscapeService CytoscapeService
+
+@page "/WeigthsCharts"
+@using System.Globalization
+
+<PageTitle>Weigths Charts - MindNose</PageTitle>
+
+<RadzenStack>
+	<RadzenRow>
+		<RadzenColumn Size="12" SizeLG="12">
+
+			<h4>Weigths Charts</h4>
+
+			<RadzenChart style="height: 400px">
+
+				<RadzenBarSeries Data="@_chartElement" CategoryProperty="@nameof(ChartElement.Target)" Title="2025" LineType="LineType.Dashed" ValueProperty="WeigthPorcent">
+					<RadzenSeriesDataLabels Visible="true" />
+				</RadzenBarSeries>
+
+				<RadzenValueAxis Formatter="@FormatAsPercentage">
+					<RadzenGridLines Visible="true" />
+					<RadzenAxisTitle Text="Weigths Origin to Destiny Terms" />
+				</RadzenValueAxis>
+
+				<RadzenBarOptions Radius="5" Height="20" />
+
+			</RadzenChart>
+		</RadzenColumn>
+	</RadzenRow>
+</RadzenStack>
+
+
+
+@code{
+	private ElementsDTO _elements = new();
+	private List<ChartElement> _chartElement = new();
+
+	protected override void OnAfterRender(bool firstRender)
+	{
+		if(firstRender)
+		{
+			_elements = CytoscapeService.GetElements();
+			ChartElementInitialize();
+			StateHasChanged();
+		}
+	}
+
+	private void ChartElementInitialize()
+	{
+		_elements.Edges.ForEach(e =>
+		{
+			string TargetId = e.Data.Target;
+			string Target = _elements.Nodes.FirstOrDefault(n => n.Data.Id == TargetId)!.Data.Extra!["Title"].ToString()!;
+
+			float value = float.Parse(e.Data.Extra!["WeigthStartToEnd"].ToString()!);
+			float min = 0.07f;
+			float max = 0.9f;
+			var normalizedValue = ( value - min ) / ( max - min ) * 100;
+
+			if (normalizedValue > 100.0f)
+			{
+				normalizedValue = 100.0f;
+			}
+			else if (normalizedValue < 0.0f)
+			{
+				normalizedValue = 0.0f;
+			}
+
+			var newChartElement = new ChartElement()
+			{
+				Target = Target,
+				WeigthPorcent = normalizedValue,
+			};
+
+			_chartElement.Add(newChartElement);
+		});
+		_chartElement = _chartElement.OrderBy(c => c.WeigthPorcent).Reverse().ToList();
+	}
+
+	public class ChartElement
+	{
+		public string Target = string.Empty;
+		public float WeigthPorcent;
+	}
+
+
+	string FormatAsPercentage(object value)
+	{
+		return ((float)value).ToString("P2", CultureInfo.InvariantCulture);
+	}
+
+}
