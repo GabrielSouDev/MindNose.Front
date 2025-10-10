@@ -5,26 +5,27 @@
 
 <PageTitle>Weigths Charts - MindNose</PageTitle>
 
-<RadzenStack>
-	<RadzenRow>
-		<RadzenColumn Size="12" SizeLG="12">
+<RadzenStack style="height: 100%;">
+	<RadzenRow style="height: 100%;">
+		<RadzenColumn Size="12" SizeLG="12" style="height: 100%;">
 
-			<h4>Weigths Charts</h4>
+			<h2>Weigths Charts</h2>
+				@foreach (var chartElements in _chartTables)
+				{
+                <h4 style="align-items: center; text-align: center;">@chartElements.Source</h4>
+				<RadzenChart Style="margin-bottom: 50px;">
+					<RadzenBarSeries Data="@chartElements.ElementsTarget" CategoryProperty="@nameof(ChartElement.Target)" Title="@chartElements.Source" LineType="LineType.Solid" ValueProperty="@nameof(ChartElement.WeigthPorcent)">
+						<RadzenSeriesDataLabels Visible="true" />
+					</RadzenBarSeries>
 
-			<RadzenChart style="height: 400px">
+				    <RadzenValueAxis Formatter="@FormatAsPercentage">
+					    <RadzenGridLines Visible="true" />
+					    <RadzenAxisTitle Text="Weigths Origin to Destiny Terms" />
+				    </RadzenValueAxis>
 
-				<RadzenBarSeries Data="@_chartElement" CategoryProperty="@nameof(ChartElement.Target)" Title="2025" LineType="LineType.Dashed" ValueProperty="WeigthPorcent">
-					<RadzenSeriesDataLabels Visible="true" />
-				</RadzenBarSeries>
-
-				<RadzenValueAxis Formatter="@FormatAsPercentage">
-					<RadzenGridLines Visible="true" />
-					<RadzenAxisTitle Text="Weigths Origin to Destiny Terms" />
-				</RadzenValueAxis>
-
-				<RadzenBarOptions Radius="5" Height="20" />
-
-			</RadzenChart>
+				    <RadzenBarOptions Radius="5" Height="10"  />
+			    </RadzenChart>
+				}
 		</RadzenColumn>
 	</RadzenRow>
 </RadzenStack>
@@ -32,61 +33,98 @@
 
 
 @code{
-	private ElementsDTO _elements = new();
-	private List<ChartElement> _chartElement = new();
+    private ElementsDTO _elements = new();
+    private List<ChartTable> _chartTables = new();
 
-	protected override void OnAfterRender(bool firstRender)
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if(firstRender)
+        {
+            _elements = CytoscapeService.GetElements();
+            ChartElementInitialize();
+            StateHasChanged();
+        }
+    }
+
+    private void ChartElementInitialize()
+    {
+        foreach (var node in _elements.Nodes)
+        {
+            var edges = _elements.Edges
+                .Where(e => e.Data.Source == node.Data.Id)
+                .ToList();
+
+            var newChartElements = new List<ChartElement>();
+
+            foreach (var edge in edges)
+            {
+                if (edge.Data.Target == null || edge.Data.Extra == null)
+                    continue;
+
+                var targetNode = _elements.Nodes.FirstOrDefault(n => n.Data.Id == edge.Data.Target);
+                if (targetNode?.Data?.Extra == null)
+                    continue;
+
+                if (!edge.Data.Extra.TryGetValue("WeigthStartToEnd", out var weightObj) || weightObj == null)
+                    continue;
+
+                if (!float.TryParse(weightObj.ToString(), out float value))
+                    continue;
+
+                string targetTitle = targetNode.Data.Extra.TryGetValue("Title", out var tVal)
+                    ? tVal?.ToString() ?? ""
+                    : "";
+
+                float min = 0.0f;
+                float max = 0.9f;
+                float normalizedValue = ((value - min) / (max - min));
+                normalizedValue = Math.Clamp(normalizedValue, 0f, 100f);
+
+                if (normalizedValue > 1.0f)
+                    normalizedValue = 1.0f;
+
+                if (normalizedValue < 0f)
+                    normalizedValue = 0f;
+
+                newChartElements.Add(new ChartElement
+                {
+                    Target = targetTitle,
+                    WeigthPorcent = normalizedValue
+                });
+            }
+
+            if (newChartElements.Count == 0)
+                continue;
+
+            newChartElements = newChartElements
+                .OrderByDescending(c => c.WeigthPorcent)
+                .ToList();
+
+            string sourceTitle = node.Data.Extra.TryGetValue("Title", out var sVal)
+                ? sVal?.ToString() ?? ""
+                : "";
+
+            _chartTables.Add(new ChartTable
+            {
+                Source = sourceTitle,
+                ElementsTarget = newChartElements
+            });
+        }
+    }
+
+	public class ChartTable
 	{
-		if(firstRender)
-		{
-			_elements = CytoscapeService.GetElements();
-			ChartElementInitialize();
-			StateHasChanged();
-		}
+		public string Source { get; set; } = string.Empty;
+		public List<ChartElement> ElementsTarget { get; set; } = new();
 	}
-
-	private void ChartElementInitialize()
-	{
-		_elements.Edges.ForEach(e =>
-		{
-			string TargetId = e.Data.Target;
-			string Target = _elements.Nodes.FirstOrDefault(n => n.Data.Id == TargetId)!.Data.Extra!["Title"].ToString()!;
-
-			float value = float.Parse(e.Data.Extra!["WeigthStartToEnd"].ToString()!);
-			float min = 0.07f;
-			float max = 0.9f;
-			var normalizedValue = ( value - min ) / ( max - min ) * 100;
-
-			if (normalizedValue > 100.0f)
-			{
-				normalizedValue = 100.0f;
-			}
-			else if (normalizedValue < 0.0f)
-			{
-				normalizedValue = 0.0f;
-			}
-
-			var newChartElement = new ChartElement()
-			{
-				Target = Target,
-				WeigthPorcent = normalizedValue,
-			};
-
-			_chartElement.Add(newChartElement);
-		});
-		_chartElement = _chartElement.OrderBy(c => c.WeigthPorcent).Reverse().ToList();
-	}
-
 	public class ChartElement
 	{
-		public string Target = string.Empty;
-		public float WeigthPorcent;
+		public string Target { get; set; } = string.Empty;
+		public float WeigthPorcent { get; set; }
 	}
-
-
+ 
 	string FormatAsPercentage(object value)
 	{
-		return ((float)value).ToString("P2", CultureInfo.InvariantCulture);
+		return Convert.ToSingle(value).ToString("P2", CultureInfo.InvariantCulture);
 	}
-
 }
