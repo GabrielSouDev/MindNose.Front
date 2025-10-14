@@ -1,31 +1,17 @@
 ﻿@inject CytoscapeService CytoscapeService
 
 @page "/WeigthsCharts"
-@using System.Globalization
 
 <PageTitle>Weigths Charts - MindNose</PageTitle>
 
-<RadzenStack style="height: 100%;">
-	<RadzenRow style="height: 100%;">
-		<RadzenColumn Size="12" SizeLG="12" style="height: 100%;">
-
+<RadzenStack style="min-height: fit-content;">
+    <RadzenRow style="min-height: fit-content;">
+        <RadzenColumn Size="12" SizeLG="12" style="min-height: fit-content;">
 			<h2>Weigths Charts</h2>
-				@foreach (var chartElements in _chartTables)
-				{
-                <h4 style="align-items: center; text-align: center;">@chartElements.Source</h4>
-				<RadzenChart Style="margin-bottom: 50px;">
-					<RadzenBarSeries Data="@chartElements.ElementsTarget" CategoryProperty="@nameof(ChartElement.Target)" Title="@chartElements.Source" LineType="LineType.Solid" ValueProperty="@nameof(ChartElement.WeigthPorcent)">
-						<RadzenSeriesDataLabels Visible="true" />
-					</RadzenBarSeries>
-
-				    <RadzenValueAxis Formatter="@FormatAsPercentage">
-					    <RadzenGridLines Visible="true" />
-					    <RadzenAxisTitle Text="Weigths Origin to Destiny Terms" />
-				    </RadzenValueAxis>
-
-				    <RadzenBarOptions Radius="5" Height="10"  />
-			    </RadzenChart>
-				}
+			@foreach (var chartElements in _chartTables)
+			{
+                <WeigthsChart ChartTable="chartElements" />
+			}
 		</RadzenColumn>
 	</RadzenRow>
 </RadzenStack>
@@ -65,7 +51,7 @@
                 if (targetNode?.Data?.Extra == null)
                     continue;
 
-                if (!edge.Data.Extra.TryGetValue("WeigthStartToEnd", out var weightObj) || weightObj == null)
+                if (!edge.Data.Extra.TryGetValue("WeightStartToEnd", out var weightObj) || weightObj == null)
                     continue;
 
                 if (!float.TryParse(weightObj.ToString(), out float value))
@@ -78,13 +64,7 @@
                 float min = 0.0f;
                 float max = 0.9f;
                 float normalizedValue = ((value - min) / (max - min));
-                normalizedValue = Math.Clamp(normalizedValue, 0f, 100f);
-
-                if (normalizedValue > 1.0f)
-                    normalizedValue = 1.0f;
-
-                if (normalizedValue < 0f)
-                    normalizedValue = 0f;
+                normalizedValue = Math.Clamp(normalizedValue, 0f, 1.0f);
 
                 newChartElements.Add(new ChartElement
                 {
@@ -109,22 +89,8 @@
                 Source = sourceTitle,
                 ElementsTarget = newChartElements
             });
+
+            _chartTables = _chartTables.OrderBy(c => c.Source).ToList();
         }
     }
-
-	public class ChartTable
-	{
-		public string Source { get; set; } = string.Empty;
-		public List<ChartElement> ElementsTarget { get; set; } = new();
-	}
-	public class ChartElement
-	{
-		public string Target { get; set; } = string.Empty;
-		public float WeigthPorcent { get; set; }
-	}
- 
-	string FormatAsPercentage(object value)
-	{
-		return Convert.ToSingle(value).ToString("P2", CultureInfo.InvariantCulture);
-	}
 }
