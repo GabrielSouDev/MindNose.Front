@@ -29,7 +29,7 @@
                 {
                     if (!visibleColumns[column]) continue;
 
-                    <RadzenDataGridColumn Title="@GetPrettyColumnName(column)">
+                    <RadzenDataGridColumn Title="@GetPrettyColumnName(column)" Property="@GetPropertyPath(column)">
                         <Template Context="model">
                             <span title="@GetColumnValue(model, column)">
                                 @GetColumnValue(model, column)
@@ -248,13 +248,30 @@
             _ => column
         };
     }
+
+    private string GetPropertyPath(string column)
+    {
+        return column switch
+        {
+            "Modality" => "Architecture.Modality",
+            "InputModalities" => "Architecture.InputModalities",
+            "OutputModalities" => "Architecture.OutputModalities",
+            "Tokenizer" => "Architecture.Tokenizer",
+            "InstructType" => "Architecture.InstructType",
+            "IsModerated" => "TopProvider.IsModerated",
+            "TopProviderContextLength" => "TopProvider.ContextLength",
+            "MaxCompletionTokens" => "TopProvider.MaxCompletionTokens",
+            "Prompt" => "Pricing.Prompt",
+            "Completion" => "Pricing.Completion",
+            "Request" => "Pricing.Request",
+            "InputCacheRead" => "Pricing.InputCacheRead",
+            "InputCacheWrite" => "Pricing.InputCacheWrite",
+            "Audio" => "Pricing.Audio",
+            "Image" => "Pricing.Image",
+            "WebSearch" => "Pricing.WebSearch",
+            "InternalReasoning" => "Pricing.InternalReasoning",
+            _ => column
+        };
+    }
+
 }
-
-    [JsonPropertyName("input_cache_read")]
-    public string InputCacheRead { get; set; }
-
-    [JsonPropertyName("input_cache_read")]
-    public string InputCacheWrite { get; set; }
-
-    [JsonPropertyName("audio")]
-    public string Audio { get; set; }
