@@ -94,7 +94,7 @@
                 .Where(m => !string.IsNullOrWhiteSpace(m))
                 .Distinct()
                 .OrderBy(m => m)
-                .ToList();
+                .ToList()!;
 
             selectedColumns = visibleColumns.Where(kvp => kvp.Value).Select(kvp => kvp.Key).ToList();
         }
@@ -217,14 +217,13 @@
         return value;
     }
 
-
     private string GetPrettyColumnName(string column)
     {
         return column switch
         {
             "Id" => "ID",
             "Name" => "Nome",
-            "Created" => "Criado Em",
+            "Created" => "Criado em",
             "Description" => "Descrição",
             "ContextLength" => "Comprimento do Contexto",
             "Modality" => "Modalidade",
@@ -232,19 +231,24 @@
             "OutputModalities" => "Modalidades de Saída",
             "Tokenizer" => "Tokenizer",
             "InstructType" => "Tipo de Instrução",
-            "Prompt" => "Preço Prompt",
-            "Completion" => "Preço Completion",
-            "InputCacheRead" => "Input Cache Read",
-            "InputCacheWrite" => "Input Cache Write",
-            "Audio" => "Audio",
-            "Request" => "Preço Request",
-            "Image" => "Preço Image",
-            "WebSearch" => "Web Search",
-            "InternalReasoning" => "Internal Reasoning",
+
+            // Pricing
+            "Prompt" => "Preço (Prompt)",
+            "Completion" => "Preço (Completion)",
+            "InputCacheRead" => "Leitura do Cache de Entrada",
+            "InputCacheWrite" => "Gravação no Cache de Entrada",
+            "Audio" => "Preço (Áudio)",
+            "Request" => "Preço (Requisição)",
+            "Image" => "Preço (Imagem)",
+            "WebSearch" => "Preço (Busca Web)",
+            "InternalReasoning" => "Preço (Raciocínio Interno)",
+
+            // Top Provider
             "IsModerated" => "Moderado?",
-            "TopProviderContextLength" => "Contexto TopProvider",
-            "MaxCompletionTokens" => "Max Completion Tokens",
-            "PerRequestLimits" => "Limites por Request",
+            "TopProviderContextLength" => "Contexto (Top Provider)",
+            "MaxCompletionTokens" => "Máx. Tokens de Conclusão",
+            "PerRequestLimits" => "Limites por Requisição",
+
             _ => column
         };
     }
@@ -253,25 +257,38 @@
     {
         return column switch
         {
+            // Model direct
+            "Id" => "Id",
+            "Name" => "Name",
+            "Created" => "Created",
+            "Description" => "Description",
+            "ContextLength" => "ContextLength",
+            "PerRequestLimits" => "PerRequestLimits",
+
+            // Architecture
             "Modality" => "Architecture.Modality",
             "InputModalities" => "Architecture.InputModalities",
             "OutputModalities" => "Architecture.OutputModalities",
             "Tokenizer" => "Architecture.Tokenizer",
             "InstructType" => "Architecture.InstructType",
-            "IsModerated" => "TopProvider.IsModerated",
-            "TopProviderContextLength" => "TopProvider.ContextLength",
-            "MaxCompletionTokens" => "TopProvider.MaxCompletionTokens",
+
+            // Pricing
             "Prompt" => "Pricing.Prompt",
             "Completion" => "Pricing.Completion",
-            "Request" => "Pricing.Request",
             "InputCacheRead" => "Pricing.InputCacheRead",
             "InputCacheWrite" => "Pricing.InputCacheWrite",
             "Audio" => "Pricing.Audio",
+            "Request" => "Pricing.Request",
             "Image" => "Pricing.Image",
             "WebSearch" => "Pricing.WebSearch",
             "InternalReasoning" => "Pricing.InternalReasoning",
+
+            // Top Provider
+            "IsModerated" => "TopProvider.IsModerated",
+            "TopProviderContextLength" => "TopProvider.ContextLength",
+            "MaxCompletionTokens" => "TopProvider.MaxCompletionTokens",
+
             _ => column
         };
     }
-
 }
