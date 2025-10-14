@@ -16,5 +16,6 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri( "http:/
 
 builder.Services.AddScoped<MindNoseService>();
 builder.Services.AddSingleton<CytoscapeService>();
+builder.Services.AddSingleton<OpenRouterService>();
 
 await builder.Build().RunAsync();

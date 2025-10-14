@@ -1,5 +1,5 @@
 ﻿using MindNose.Front.Models.Cytoscape;
-using MindNose.Front.Models.IAModels;
+using MindNose.Front.Models.LLMModels;
 using Newtonsoft.Json;
 using System.Net.Http.Json;
 using System.Text;
@@ -32,10 +32,10 @@ public class MindNoseService
         else
             throw new Exception();
     }
-    public async Task<List<ModelDTO>> GetModels()
+    public async Task<ModelResponse> GetModels()
     {
 
-        var modelList = await _httpClient.GetFromJsonAsync<List<ModelDTO>>("api/Utils/GetModelsList");
+        var modelList = await _httpClient.GetFromJsonAsync<ModelResponse>("api/Utils/GetModelsList");
 
         if (modelList is not null)
             return modelList;

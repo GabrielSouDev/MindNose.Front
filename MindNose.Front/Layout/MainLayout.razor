@@ -1,4 +1,6 @@
-﻿@inherits LayoutComponentBase
+﻿@inject MindNoseService MindNoseService
+
+@inherits LayoutComponentBase
 
 <HeadContent>
     <RadzenTheme Theme="Humanistic-Dark" />
@@ -17,10 +19,15 @@
     </RadzenHeader>
 
     <RadzenSidebar style="width: 33vw;" @bind-Expanded="@sidebarExpanded">
-        <ChatDrawer />
+        <CascadingValue Value="@_models">
+            <ChatDrawer />
+        </CascadingValue>
     </RadzenSidebar>
     <RadzenBody Style="height: 98vh; display: flex; flex-direction: column;">
-        @Body
+        <CascadingValue Value="@_models">
+            @Body
+        </CascadingValue>
+
     </RadzenBody>
 </RadzenLayout>
 
@@ -28,4 +35,10 @@
 
 @code {
     bool sidebarExpanded = false;
+    private ModelResponse _models { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _models = await MindNoseService.GetModels();
+    }
 }

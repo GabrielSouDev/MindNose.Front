@@ -1,5 +1,5 @@
 @using ChatMessage = Models.IAChat.ChatMessage
-@inject MindNoseService MindNoseService
+@inject OpenRouterService OpenRouterService
 
 <RadzenStack Style="height: 100%;">
     <RadzenCard Style="height: 100%; display: flex; flex-direction: column;">
@@ -35,10 +35,11 @@
         <div style="padding: 10px; border-top: 1px solid #ccc;">
             <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Style="width:100%;">
                 <RadzenLabel Style="width:fit-content; white-space: nowrap;" Text="Select Model: " />
-                <RadzenDropDown @bind-Value=@_selectedModel Data="@_models" 
-					TextProperty="@nameof(ModelDTO.Name)" 
-					ValueProperty="@nameof(ModelDTO.Id)" 
-					Disabled="false" Style="width: 100%;" />
+				<RadzenDropDown @bind-Value="@_selectedModelId"
+								Data="@_modelsChat"
+								TextProperty="@nameof(ModelChat.Name)"
+								ValueProperty="@nameof(ModelChat.Id)"
+								Style="width: 100%;" />
             </RadzenStack>
 
 			<RadzenTextArea Placeholder="Escreva sua mensagem." 
@@ -52,9 +53,11 @@
 </RadzenStack>
 
 @code{
-	private Models.IAChat.ChatMessage _chatMessage = new();
-	private List<ModelDTO>? _models = new();
-	private string _selectedModel = "mistralai/mistral-small-3.2-24b-instruct";
+	[CascadingParameter] private ModelResponse _models { get; set; } = new();
+
+	private List<ModelChat> _modelsChat = new();
+	private ChatMessage _chatMessage = new();
+	private string _selectedModelId = string.Empty;
 	private Message _textBox = new()
 	{
 		Text = string.Empty,
@@ -62,21 +65,21 @@
 	};
 	private bool _preventDefaultEnter = false;
 
-	protected override async Task OnAfterRenderAsync(bool firstRender)
+	protected override void OnParametersSet()
 	{
-		if(firstRender)
+		if (_models?.Data != null && _models.Data.Any())
 		{
-			try
-			{
-				_models = await MindNoseService.GetModels();
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine($"Erro ao realizar requisição:\n   {ex.Message}");
-				return;
-			}
+			_modelsChat = _models.Data.Select(d => new ModelChat(d.Id, d.Name)).ToList();
 
-			StateHasChanged();
+			var model = _modelsChat.FirstOrDefault(m => m.Id == "mistralai/mistral-small-3.2-24b-instruct");
+			if (model is not null)
+			{
+				_selectedModelId = model.Id;
+			}
+			else
+				_selectedModelId = _modelsChat.First().Id;
+
+			Console.WriteLine(_selectedModelId);
 		}
 	}
 
@@ -84,6 +87,8 @@
 	{
 		_chatMessage.Messages.Add(new Message { Text = "Bem-vindo ao MindNose!" });
 		_chatMessage.Messages.Add(new Message { Text = "Digite sua dúvida." });
+
+		StateHasChanged();
 	}
 
 	private void Submit()
