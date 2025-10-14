@@ -1,13 +1,17 @@
-﻿<RadzenStack Gap="2rem">
+﻿@using System.Globalization
+@using Radzen
+
+<RadzenStack Gap="2rem">
+
     <!-- Filtros -->
     <RadzenCard Style="padding: 1rem;">
         <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem" Wrap="FlexWrap.Wrap">
-            <RadzenTextBox @bind-Value="filterName" Placeholder="Filtrar por nome" Style="width: 200px;" Change="@((_) => ApplyFilter())" />
+            <RadzenTextBox @bind-Value="filterName" Placeholder="Filtrar por palavra-chave" Style="width: 200px;" Change="@((_) => ApplyFilter())" />
             <RadzenDropDown @bind-Value="selectedModality" Data="@modalities" Placeholder="Modalidade" AllowClear="true" Style="width: 200px;" Change="@((_) => ApplyFilter())" />
             <RadzenDropDown @bind-Value="selectedContextRange" Data="@contextRanges" Placeholder="Contexto mínimo" AllowClear="true" Style="width: 200px;" Change="@((_) => ApplyFilter())" />
             <RadzenDropDown @bind-Value="selectedPriceRange" Data="@priceRanges" Placeholder="Faixa de preço" Style="width: 200px;" Change="@((_) => ApplyFilter())" />
             <RadzenDropDown @bind-Value="selectedModeration" Data="@moderationOptions" Placeholder="Moderação" Style="width: 150px;" Change="@((_) => ApplyFilter())" />
-            <RadzenDropDown @bind-Value="selectedColumns" Data="@visibleColumns.Keys.ToList()" Placeholder="Selecionar colunas" Style="width: 300px;" Multiple="true" Change="@((_) => UpdateVisibleColumns())" />
+            <RadzenDropDown @bind-Value="selectedColumns" Data="@ColumnMeta.Keys.ToList()" Placeholder="Selecionar colunas" Style="width: 300px;" Multiple="true" Change="@((_) => UpdateVisibleColumns())" />
             <RadzenButton Text="Aplicar Filtro" Click="@ApplyFilter" Style="margin-left: auto;" />
         </RadzenStack>
     </RadzenCard>
@@ -25,14 +29,17 @@
                         AllowSorting="true"
                         Style="height: auto; min-height: 500px;">
             <Columns>
-                @foreach (var column in visibleColumns.Keys)
+                @foreach (var column in visibleColumns.Where(c => c.Value))
                 {
-                    if (!visibleColumns[column]) continue;
+                    var meta = ColumnMeta[column.Key];
+                    var sortable = !new[] { "InputModalities", "OutputModalities", "InstructType" }.Contains(column.Key);
 
-                    <RadzenDataGridColumn Title="@GetPrettyColumnName(column)" Property="@GetPropertyPath(column)">
+                    <RadzenDataGridColumn Title="@meta.PrettyName"
+                                          Property="@meta.PropertyPath"
+                                          Sortable="@sortable">
                         <Template Context="model">
-                            <span title="@GetColumnValue(model, column)">
-                                @GetColumnValue(model, column)
+                            <span title="@meta.ValueSelector(model)">
+                                @meta.ValueSelector(model)
                             </span>
                         </Template>
                     </RadzenDataGridColumn>
@@ -55,49 +62,89 @@
     private string? selectedContextRange;
 
     private int pageSize = 50;
-    private List<int> pageSizeOptions = new() { 10, 20, 50, 100, 200, 500 };
+    private readonly List<int> pageSizeOptions = new() { 10, 20, 50, 100, 200, 500 };
+
+    // --- META CENTRALIZADA ---
+    private readonly Dictionary<string, (string PrettyName, string PropertyPath, Func<Model, string> ValueSelector)> ColumnMeta =
+        new()
+        {
+            ["Id"] = ("ID", "Id", m => m.Id ?? ""),
+            ["Name"] = ("Nome", "Name", m => m.Name ?? ""),
+            ["Created"] = ("Criado em", "Created",
+                m => m.Created.HasValue ? DateTimeOffset.FromUnixTimeSeconds(m.Created.Value).ToLocalTime().ToString("g") : ""),
+            ["Description"] = ("Descrição", "Description", m => m.Description ?? ""),
+            ["ContextLength"] = ("Comprimento do Contexto", "ContextLength", m => m.ContextLength?.ToString("N0") ?? "—"),
+            ["Modality"] = ("Modalidade", "Architecture.Modality", m => m.Architecture?.Modality ?? "—"),
+            ["InputModalities"] = ("Modalidades de Entrada", "Architecture.InputModalities", m => string.Join(", ", m.Architecture?.InputModalities ?? new())),
+            ["OutputModalities"] = ("Modalidades de Saída", "Architecture.OutputModalities", m => string.Join(", ", m.Architecture?.OutputModalities ?? new())),
+            ["Tokenizer"] = ("Tokenizer", "Architecture.Tokenizer", m => m.Architecture?.Tokenizer ?? "—"),
+            ["InstructType"] = ("Tipo de Instrução", "Architecture.InstructType", m => m.Architecture?.InstructType?.ToString() ?? "—"),
+            ["Prompt"] = ("Preço (Prompt)", "Pricing.Prompt", m => FormatPrice(m.Pricing?.Prompt)),
+            ["Completion"] = ("Preço (Completion)", "Pricing.Completion", m => FormatPrice(m.Pricing?.Completion)),
+            ["InputCacheRead"] = ("Leitura do Cache de Entrada", "Pricing.InputCacheRead", m => FormatPrice(m.Pricing?.InputCacheRead)),
+            ["InputCacheWrite"] = ("Gravação no Cache de Entrada", "Pricing.InputCacheWrite", m => FormatPrice(m.Pricing?.InputCacheWrite)),
+            ["Audio"] = ("Preço (Áudio)", "Pricing.Audio", m => FormatPrice(m.Pricing?.Audio, false)),
+            ["Request"] = ("Preço (Requisição)", "Pricing.Request", m => FormatPrice(m.Pricing?.Request)),
+            ["Image"] = ("Preço (Imagem)", "Pricing.Image", m => FormatPrice(m.Pricing?.Image, true)),
+            ["WebSearch"] = ("Preço (Busca Web)", "Pricing.WebSearch", m => FormatPrice(m.Pricing?.WebSearch, false)),
+            ["InternalReasoning"] = ("Preço (Raciocínio Interno)", "Pricing.InternalReasoning", m => FormatPrice(m.Pricing?.InternalReasoning)),
+            ["IsModerated"] = ("Moderado?", "TopProvider.IsModerated", m => m.TopProvider?.IsModerated == true ? "✅" : "❌"),
+            ["TopProviderContextLength"] = ("Contexto (Top Provider)", "TopProvider.ContextLength", m => m.TopProvider?.ContextLength?.ToString("N0") ?? "—"),
+            ["MaxCompletionTokens"] = ("Máx. Tokens de Conclusão", "TopProvider.MaxCompletionTokens", m => m.TopProvider?.MaxCompletionTokens?.ToString() ?? "—"),
+            ["PerRequestLimits"] = ("Limites por Requisição", "PerRequestLimits", m => m.PerRequestLimits?.ToString() ?? "—"),
+        };
 
     private Dictionary<string, bool> visibleColumns = new()
     {
-        { "Id", false }, { "Name", true }, { "ContextLength", true }, { "Description", false },
-        { "Modality", true }, { "InputModalities", false }, { "OutputModalities", false },
-        { "Tokenizer", false }, { "InstructType", false }, { "Prompt", true },
-        { "Completion", true }, { "Request", false }, { "InputCacheRead", false }, { "InputCacheWrite", false }, 
-        { "Audio", false }, { "Image", false },
-        { "WebSearch", false }, { "InternalReasoning", false },
-        { "IsModerated", true }, { "TopProviderContextLength", false },
-        { "MaxCompletionTokens", false }, { "PerRequestLimits", false },
-        { "Created", true }
+        ["Id"] = false,
+        ["Name"] = true,
+        ["ContextLength"] = true,
+        ["Description"] = false,
+        ["Modality"] = true,
+        ["InputModalities"] = false,
+        ["OutputModalities"] = false,
+        ["Tokenizer"] = true,
+        ["InstructType"] = false,
+        ["Prompt"] = true,
+        ["Completion"] = true,
+        ["Request"] = false,
+        ["InputCacheRead"] = false,
+        ["InputCacheWrite"] = false,
+        ["Audio"] = false,
+        ["Image"] = false,
+        ["WebSearch"] = false,
+        ["InternalReasoning"] = false,
+        ["IsModerated"] = true,
+        ["TopProviderContextLength"] = false,
+        ["MaxCompletionTokens"] = false,
+        ["PerRequestLimits"] = false,
+        ["Created"] = true
     };
 
-    private List<string> priceRanges = new()
+    private readonly List<string> priceRanges = new()
     {
         "Todos", "Grátis", "Até 0.0000001", "0.0000001 - 0.000001",
         "0.000001 - 0.00001", "0.00001 - 0.0001", "0.0001 - 0.001",
         "0.001 - 0.01", "0.01 - 0.1", "Acima de 0.1"
     };
 
-    private List<string> moderationOptions = new() { "Todos", "Moderado", "Não moderado" };
-    private List<string> contextRanges = new()
-    {
-        "Até 4096", "4096 - 8192", "8192 - 32768", "32768 - 100000", "Acima de 100000"
-    };
+    private readonly List<string> moderationOptions = new() { "Todos", "Moderado", "Não moderado" };
+    private readonly List<string> contextRanges = new() { "Até 4096", "4096 - 8192", "8192 - 32768", "32768 - 100000", "Acima de 100000" };
 
     protected override void OnParametersSet()
     {
-        if (Models?.Data != null)
-        {
-            filteredModels = Models.Data;
+        if (Models?.Data == null) return;
 
-            modalities = Models.Data
-                .Select(m => m.Architecture?.Modality)
-                .Where(m => !string.IsNullOrWhiteSpace(m))
-                .Distinct()
-                .OrderBy(m => m)
-                .ToList()!;
+        filteredModels = Models.Data.ToList();
 
-            selectedColumns = visibleColumns.Where(kvp => kvp.Value).Select(kvp => kvp.Key).ToList();
-        }
+        modalities = Models.Data
+            .Select(m => m.Architecture?.Modality)
+            .Where(m => !string.IsNullOrWhiteSpace(m))
+            .Distinct()
+            .OrderBy(m => m)
+            .ToList()!;
+
+        selectedColumns = visibleColumns.Where(kvp => kvp.Value).Select(kvp => kvp.Key).ToList();
     }
 
     private void UpdateVisibleColumns()
@@ -115,180 +162,62 @@
             var preco = ParseDecimalSafe(model.Pricing?.Request);
             var contexto = model.ContextLength ?? 0;
 
-            bool matchName = string.IsNullOrWhiteSpace(filterName) || model.Name?.Contains(filterName, StringComparison.OrdinalIgnoreCase) == true;
-            bool matchModality = string.IsNullOrEmpty(selectedModality) || model.Architecture?.Modality == selectedModality;
+            bool matchesText = string.IsNullOrWhiteSpace(filterName) ||
+                ColumnMeta
+                    .Where(kvp => visibleColumns[kvp.Key]) // só nas colunas visíveis
+                    .Select(kvp => kvp.Value.ValueSelector(model))
+                    .Any(value => value.Contains(filterName, StringComparison.OrdinalIgnoreCase));
 
-            bool matchPreco = selectedPriceRange switch
-            {
-                "Grátis" => preco == 0,
-                "Até 0.0000001" => preco <= 0.0000001m,
-                "0.0000001 - 0.000001" => preco > 0.0000001m && preco <= 0.000001m,
-                "0.000001 - 0.00001" => preco > 0.000001m && preco <= 0.00001m,
-                "0.00001 - 0.0001" => preco > 0.00001m && preco <= 0.0001m,
-                "0.0001 - 0.001" => preco > 0.0001m && preco <= 0.001m,
-                "0.001 - 0.01" => preco > 0.001m && preco <= 0.01m,
-                "0.01 - 0.1" => preco > 0.01m && preco <= 0.1m,
-                "Acima de 0.1" => preco > 0.1m,
-                _ => true
-            };
-
-            bool matchModeration = selectedModeration switch
-            {
-                "Moderado" => model.TopProvider?.IsModerated == true,
-                "Não moderado" => model.TopProvider?.IsModerated == false,
-                _ => true
-            };
-
-            bool matchContext = selectedContextRange switch
-            {
-                "Até 4096" => contexto <= 4096,
-                "4096 - 8192" => contexto > 4096 && contexto <= 8192,
-                "8192 - 32768" => contexto > 8192 && contexto <= 32768,
-                "32768 - 100000" => contexto > 32768 && contexto <= 100000,
-                "Acima de 100000" => contexto > 100000,
-                _ => true
-            };
-
-            return matchName && matchModality && matchPreco && matchModeration && matchContext;
+            return
+                matchesText &&
+                (string.IsNullOrEmpty(selectedModality) || model.Architecture?.Modality == selectedModality) &&
+                MatchPrice(preco) &&
+                MatchModeration(model.TopProvider?.IsModerated) &&
+                MatchContext(contexto);
         }).ToList();
     }
 
-    private decimal ParseDecimalSafe(string? value)
+    private bool MatchPrice(decimal preco) => selectedPriceRange switch
     {
-        if (string.IsNullOrWhiteSpace(value)) return 0;
-        if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
-            return result;
-        return 0;
-    }
+        "Grátis" => preco == 0,
+        "Até 0.0000001" => preco <= 0.0000001m,
+        "0.0000001 - 0.000001" => preco > 0.0000001m && preco <= 0.000001m,
+        "0.000001 - 0.00001" => preco > 0.000001m && preco <= 0.00001m,
+        "0.00001 - 0.0001" => preco > 0.00001m && preco <= 0.0001m,
+        "0.0001 - 0.001" => preco > 0.0001m && preco <= 0.001m,
+        "0.001 - 0.01" => preco > 0.001m && preco <= 0.01m,
+        "0.01 - 0.1" => preco > 0.01m && preco <= 0.1m,
+        "Acima de 0.1" => preco > 0.1m,
+        _ => true
+    };
 
-    private string GetColumnValue(Model model, string column)
+    private bool MatchModeration(bool? isModerated) => selectedModeration switch
     {
-        switch (column)
-        {
-            case "Id": return model.Id ?? "";
-            case "Name": return model.Name ?? "";
-            case "Created":
-                return model.Created.HasValue
-                    ? DateTimeOffset.FromUnixTimeSeconds(model.Created.Value).ToLocalTime().ToString("g")
-                    : "";
-            case "Description": return model.Description ?? "";
-            case "ContextLength": return model.ContextLength?.ToString("N0") ?? "—";
-            case "Modality": return model.Architecture?.Modality ?? "—";
-            case "InputModalities": return string.Join(", ", model.Architecture?.InputModalities ?? new()) ?? "—";
-            case "OutputModalities": return string.Join(", ", model.Architecture?.OutputModalities ?? new()) ?? "—";
-            case "Tokenizer": return model.Architecture?.Tokenizer ?? "—";
-            case "InstructType": return model.Architecture?.InstructType?.ToString() ?? "—";
-            case "Prompt": return FormatPrice(model.Pricing?.Prompt);
-            case "Completion": return FormatPrice(model.Pricing?.Completion);
-            case "InputCacheRead": return FormatPrice(model.Pricing?.InputCacheRead);
-            case "InputCacheWrite": return FormatPrice(model.Pricing?.InputCacheWrite);
-            case "Audio": return FormatPrice(model.Pricing?.Audio, false);
-            case "Request": return FormatPrice(model.Pricing?.Request);
-            case "Image": return FormatPrice(model.Pricing?.Image, true);
-            case "WebSearch": return FormatPrice(model.Pricing?.WebSearch, false);
-            case "InternalReasoning": return FormatPrice(model.Pricing?.InternalReasoning);
-            case "IsModerated": return model.TopProvider?.IsModerated == true ? "✅" : "❌";
-            case "TopProviderContextLength": return model.TopProvider?.ContextLength?.ToString("N0") ?? "—";
-            case "MaxCompletionTokens": return model.TopProvider?.MaxCompletionTokens?.ToString() ?? "—";
-            case "PerRequestLimits": return model.PerRequestLimits?.ToString() ?? "—";
-            default: return "";
-        }
-    }
+        "Moderado" => isModerated == true,
+        "Não moderado" => isModerated == false,
+        _ => true
+    };
 
-    private string FormatPrice(string? value, bool isPerToken = true)
+    private bool MatchContext(int contexto) => selectedContextRange switch
+    {
+        "Até 4096" => contexto <= 4096,
+        "4096 - 8192" => contexto > 4096 && contexto <= 8192,
+        "8192 - 32768" => contexto > 8192 && contexto <= 32768,
+        "32768 - 100000" => contexto > 32768 && contexto <= 100000,
+        "Acima de 100000" => contexto > 100000,
+        _ => true
+    };
+
+    private static decimal ParseDecimalSafe(string? value) =>
+        decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result) ? result : 0;
+
+    private static string FormatPrice(string? value, bool isPerToken = true)
     {
         if (string.IsNullOrWhiteSpace(value)) return "—";
+        if (!decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var d)) return value;
 
-        if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var d))
-        {
-            if (d == 0) return "0";
-
-            var price = isPerToken ? d * 1_000_000 : d;
-
-            if (isPerToken)
-            {
-                return $"${price:0.######}/M tokens";
-                
-            }
-            else
-                return $"${price:0.######}/K tokens";
-        }
-
-        return value;
-    }
-
-    private string GetPrettyColumnName(string column)
-    {
-        return column switch
-        {
-            "Id" => "ID",
-            "Name" => "Nome",
-            "Created" => "Criado em",
-            "Description" => "Descrição",
-            "ContextLength" => "Comprimento do Contexto",
-            "Modality" => "Modalidade",
-            "InputModalities" => "Modalidades de Entrada",
-            "OutputModalities" => "Modalidades de Saída",
-            "Tokenizer" => "Tokenizer",
-            "InstructType" => "Tipo de Instrução",
-
-            // Pricing
-            "Prompt" => "Preço (Prompt)",
-            "Completion" => "Preço (Completion)",
-            "InputCacheRead" => "Leitura do Cache de Entrada",
-            "InputCacheWrite" => "Gravação no Cache de Entrada",
-            "Audio" => "Preço (Áudio)",
-            "Request" => "Preço (Requisição)",
-            "Image" => "Preço (Imagem)",
-            "WebSearch" => "Preço (Busca Web)",
-            "InternalReasoning" => "Preço (Raciocínio Interno)",
-
-            // Top Provider
-            "IsModerated" => "Moderado?",
-            "TopProviderContextLength" => "Contexto (Top Provider)",
-            "MaxCompletionTokens" => "Máx. Tokens de Conclusão",
-            "PerRequestLimits" => "Limites por Requisição",
-
-            _ => column
-        };
-    }
-
-    private string GetPropertyPath(string column)
-    {
-        return column switch
-        {
-            // Model direct
-            "Id" => "Id",
-            "Name" => "Name",
-            "Created" => "Created",
-            "Description" => "Description",
-            "ContextLength" => "ContextLength",
-            "PerRequestLimits" => "PerRequestLimits",
-
-            // Architecture
-            "Modality" => "Architecture.Modality",
-            "InputModalities" => "Architecture.InputModalities",
-            "OutputModalities" => "Architecture.OutputModalities",
-            "Tokenizer" => "Architecture.Tokenizer",
-            "InstructType" => "Architecture.InstructType",
-
-            // Pricing
-            "Prompt" => "Pricing.Prompt",
-            "Completion" => "Pricing.Completion",
-            "InputCacheRead" => "Pricing.InputCacheRead",
-            "InputCacheWrite" => "Pricing.InputCacheWrite",
-            "Audio" => "Pricing.Audio",
-            "Request" => "Pricing.Request",
-            "Image" => "Pricing.Image",
-            "WebSearch" => "Pricing.WebSearch",
-            "InternalReasoning" => "Pricing.InternalReasoning",
-
-            // Top Provider
-            "IsModerated" => "TopProvider.IsModerated",
-            "TopProviderContextLength" => "TopProvider.ContextLength",
-            "MaxCompletionTokens" => "TopProvider.MaxCompletionTokens",
-
-            _ => column
-        };
+        if (d == 0) return "0";
+        var price = isPerToken ? d * 1_000_000 : d;
+        return isPerToken ? $"${price:0.######}/M tokens" : $"${price:0.######}/K tokens";
     }
 }

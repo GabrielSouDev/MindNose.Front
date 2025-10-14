@@ -7,7 +7,7 @@ public class TopProvider
     public int? ContextLength { get; set; }
 
     [JsonPropertyName("max_completion_tokens")]
-    public object? MaxCompletionTokens { get; set; }
+    public int? MaxCompletionTokens { get; set; }
 
     [JsonPropertyName("is_moderated")]
     public bool? IsModerated { get; set; }
