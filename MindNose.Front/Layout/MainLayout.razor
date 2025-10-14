@@ -34,11 +34,12 @@
 <RadzenComponents />
 
 @code {
-    bool sidebarExpanded = false;
+    bool sidebarExpanded;
     private ModelResponse _models { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
         _models = await MindNoseService.GetModels();
+        sidebarExpanded = false;
     }
 }
