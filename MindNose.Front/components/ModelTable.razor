@@ -1,5 +1,6 @@
 ﻿@using System.Globalization
 @using Radzen
+@inject OpenRouterService OpenRouterService
 
 <RadzenStack Gap="2rem">
 
@@ -37,9 +38,9 @@
                     <RadzenDataGridColumn Title="@meta.PrettyName"
                                           Property="@meta.PropertyPath"
                                           Sortable="@sortable">
-                        <Template Context="model">
-                            <span title="@meta.ValueSelector(model)">
-                                @meta.ValueSelector(model)
+                        <Template Context="Model">
+                            <span title="@meta.ValueSelector(Model)">
+                                @meta.ValueSelector(Model)
                             </span>
                         </Template>
                     </RadzenDataGridColumn>
@@ -50,7 +51,7 @@
 </RadzenStack>
 
 @code {
-    [Parameter] public ModelResponse Models { get; set; } = new();
+    private ModelResponse _models { get; set; } = new();
     private List<Model> filteredModels = new();
     private List<string> modalities = new();
     private List<string> selectedColumns = new();
@@ -133,18 +134,22 @@
 
     protected override void OnParametersSet()
     {
-        if (Models?.Data == null) return;
+        _models = OpenRouterService.GetModels();
 
-        filteredModels = Models.Data.ToList();
+        if (_models?.Data != null && _models.Data.Any())
+        {
+            filteredModels = _models.Data.ToList();
 
-        modalities = Models.Data
-            .Select(m => m.Architecture?.Modality)
-            .Where(m => !string.IsNullOrWhiteSpace(m))
-            .Distinct()
-            .OrderBy(m => m)
-            .ToList()!;
+            modalities = _models.Data
+                .Select(m => m.Architecture?.Modality)
+                .Where(m => !string.IsNullOrWhiteSpace(m))
+                .Distinct()
+                .OrderBy(m => m)
+                .ToList()!;
 
-        selectedColumns = visibleColumns.Where(kvp => kvp.Value).Select(kvp => kvp.Key).ToList();
+            selectedColumns = visibleColumns.Where(kvp => kvp.Value).Select(kvp => kvp.Key).ToList();
+        }
+
     }
 
     private void UpdateVisibleColumns()
@@ -155,9 +160,9 @@
 
     private void ApplyFilter()
     {
-        if (Models?.Data == null) return;
+        if (_models?.Data == null) return;
 
-        filteredModels = Models.Data.Where(model =>
+        filteredModels = _models.Data.Where(model =>
         {
             var preco = ParseDecimalSafe(model.Pricing?.Request);
             var contexto = model.ContextLength ?? 0;

@@ -1,4 +1,7 @@
-﻿@inject MindNoseService MindNoseService
+﻿@inject NavigationManager NavigationManager
+@inject MindNoseService MindNoseService
+@inject CytoscapeService CytoscapeService
+@inject OpenRouterService OpenRouterService
 
 @inherits LayoutComponentBase
 
@@ -10,7 +13,7 @@
     <RadzenHeader Style="height: 2vh;">
         <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center" Gap="1rem">
             <div style="display:flex; flex-direction: row; align-content:center; align-items:center; text-align:center; gap:50px;">
-                <RadzenLabel Style="padding-left: 25px; font-size: x-large;" Text="MindNose" />
+                <RadzenLabel @onclick="@(() => NavigationManager.NavigateTo("/"))" Style="padding-left: 25px; font-size: x-large; cursor:pointer;" Text="MindNose" />
                 <NavMenu />
             </div>
 
@@ -19,27 +22,21 @@
     </RadzenHeader>
 
     <RadzenSidebar style="width: 33vw;" @bind-Expanded="@sidebarExpanded">
-        <CascadingValue Value="@_models">
-            <ChatDrawer />
-        </CascadingValue>
+        <ChatDrawer />
     </RadzenSidebar>
     <RadzenBody Style="height: 98vh; display: flex; flex-direction: column;">
-        <CascadingValue Value="@_models">
-            @Body
-        </CascadingValue>
-
+        @Body
     </RadzenBody>
 </RadzenLayout>
 
 <RadzenComponents />
 
 @code {
-    bool sidebarExpanded;
-    private ModelResponse _models { get; set; } = new();
+    private bool sidebarExpanded;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        _models = await MindNoseService.GetModels();
         sidebarExpanded = false;
+        StateHasChanged();
     }
 }

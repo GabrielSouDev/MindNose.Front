@@ -2,16 +2,27 @@
 using MindNose.Front.Models.LLMModels;
 using Newtonsoft.Json;
 using System.Net.Http.Json;
+using System.Reflection;
 using System.Text;
 
 namespace MindNose.Front.Services;
 public class MindNoseService
 {
-    private HttpClient _httpClient;
+    private readonly HttpClient _httpClient;
+    private readonly OpenRouterService _openRouterService;
+    private readonly CytoscapeService _cytoscapeService;
 
-    public MindNoseService(HttpClient httpClient)
+    public MindNoseService(HttpClient httpClient, OpenRouterService openRouterService, CytoscapeService cytoscapeService)
     {
         _httpClient = httpClient;
+        _openRouterService = openRouterService;
+        _cytoscapeService = cytoscapeService;
+    }
+
+    public async Task InitializeAsync()
+    {
+        _openRouterService.SetModels(await GetModels());
+        _cytoscapeService.SetCategories(await GetCategories());
     }
 
     public async Task<ElementsDTO> CreateOrGetLink(object request)
@@ -19,7 +30,7 @@ public class MindNoseService
         var json = JsonConvert.SerializeObject(request);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        var response = await _httpClient.PostAsync("api/MindNoseCore/CreateOrGetLink", content);
+        var response = await _httpClient.PostAsync("api/MindNoseCore/GetOrCreateLink", content);
 
         if (response.IsSuccessStatusCode)
         {
@@ -32,14 +43,33 @@ public class MindNoseService
         else
             throw new Exception();
     }
-    public async Task<ModelResponse> GetModels()
+    private async Task<ModelResponse> GetModels()
     {
 
-        var modelList = await _httpClient.GetFromJsonAsync<ModelResponse>("api/Utils/GetModelsList");
+        var modelList = await _httpClient.GetFromJsonAsync<ModelResponse>("api/Utils/GetModels");
 
         if (modelList is not null)
             return modelList;
 
         throw new Exception();
     }
+
+    private async Task<List<CategoryResponse>> GetCategories()
+    {
+
+        var categories = await _httpClient.GetFromJsonAsync<List<CategoryResponse>>("api/Utils/GetCategories");
+
+        if (categories is not null)
+            return categories;
+
+        throw new Exception();
+    }
+
+
+}
+
+public class CategoryResponse
+{
+    public string Title { get; set; } = string.Empty;
+    public string Summary { get; set; } = string.Empty;
 }

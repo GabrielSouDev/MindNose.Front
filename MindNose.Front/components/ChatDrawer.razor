@@ -29,7 +29,6 @@
                     </div>
                 }
             }
-
         </div>
 
         <div style="padding: 10px; border-top: 1px solid #ccc;">
@@ -53,8 +52,6 @@
 </RadzenStack>
 
 @code{
-	[CascadingParameter] private ModelResponse _models { get; set; } = new();
-
 	private List<ModelChat> _modelsChat = new();
 	private ChatMessage _chatMessage = new();
 	private string _selectedModelId = string.Empty;
@@ -63,13 +60,15 @@
 		Text = string.Empty,
 		Origin = IAChatOrigin.User
 	};
+
 	private bool _preventDefaultEnter = false;
 
 	protected override void OnParametersSet()
 	{
-		if (_models?.Data != null && _models.Data.Any())
+		var models = OpenRouterService.GetModels();
+		if (models?.Data != null && models.Data.Any())
 		{
-			_modelsChat = _models.Data.Select(d => new ModelChat(d.Id, d.Name)).ToList();
+			_modelsChat = models.Data.Select(d => new ModelChat(d.Id, d.Name)).ToList();
 
 			var model = _modelsChat.FirstOrDefault(m => m.Id == "mistralai/mistral-small-3.2-24b-instruct");
 			if (model is not null)

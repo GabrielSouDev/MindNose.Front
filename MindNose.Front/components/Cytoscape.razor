@@ -3,13 +3,17 @@
 @inject MindNoseService MindNoseService
 
 <div style="display: flex; flex-direction:row; text-align: center; align-items:center;">
-    <RadzenLabel Text="Categoria: " />
-    <RadzenTextBox @bind-Value="_category" />
+	<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Style="width:100%;">
+		<RadzenLabel Style="width:fit-content; white-space: nowrap;" Text="Categoria: " />
+		<RadzenDropDown @bind-Value="@_category"
+						Data="@_categories"
+						TextProperty="@nameof(CategoryResponse.Title)"
+						ValueProperty="@nameof(CategoryResponse.Title)" />
+		<RadzenLabel Text="Termo: " />
+		<RadzenTextBox @bind-Value="_term" />
 
-    <RadzenLabel Text="Termo: " />
-    <RadzenTextBox @bind-Value="_term" />
-
-    <RadzenButton Click="Search" />
+		<RadzenButton Icon="Search" Click="Search" />
+	</RadzenStack>
 </div>
 
 <div id="@Id" style="width:100%; height: 90%; border: 1px solid #ccc"></div>
@@ -29,20 +33,27 @@
 @code {
 	[Parameter] public string Id { get; set; } = "cy";
 
-	private string _category = "Programação";
+	private List<CategoryResponse> _categories = new();
+	private string _category = string.Empty;
 	private string _term = "Javascript";
 	private string _model = "mistralai/mistral-small-3.2-24b-instruct";
 
 	private CytoscapeLayout _layout;
+
+	protected override async Task OnParametersSetAsync()
+	{
+		_layout = CytoscapeService.GetLayout();
+		_categories = CytoscapeService.GetCategories();
+		_category = _categories.First().Title;
+	}
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)
 		{
 			var elements = CytoscapeService.GetElements();
-			_layout = CytoscapeService.GetLayout();
-
 			await JS.InvokeVoidAsync("cytoscapeInterop.init", Id, elements, _layout.ToString());
+
 			StateHasChanged();
 		}
 	}

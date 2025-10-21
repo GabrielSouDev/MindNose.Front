@@ -18,4 +18,10 @@ builder.Services.AddScoped<MindNoseService>();
 builder.Services.AddSingleton<CytoscapeService>();
 builder.Services.AddSingleton<OpenRouterService>();
 
-await builder.Build().RunAsync();
+var app = builder.Build();
+
+var mindnoseservice = app.Services.GetService<MindNoseService>()!;
+
+await mindnoseservice.InitializeAsync();
+
+await app.RunAsync();
