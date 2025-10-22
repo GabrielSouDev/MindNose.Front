@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MindNose.Front</title>
+    <title>MindNose</title>
     <base href="/" />
     <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
     <link rel="stylesheet" href="css/app.css" />
@@ -14,11 +14,18 @@
 
 <body>
     <div id="app">
-        <svg class="loading-progress">
-            <circle r="40%" cx="50%" cy="50%" />
-            <circle r="40%" cx="50%" cy="50%" />
-        </svg>
-        <div class="loading-progress-text"></div>
+        <div class="loading-progress">
+            <svg viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40"></circle>
+                <circle cx="50" cy="50" r="40"></circle>
+            </svg>
+
+            <div class="loading-center">
+                <div class="title">MindNose</div>
+                <div class="subtitle">carregando<span class="dots"></span></div>
+                <div class="percent"></div>
+            </div>
+        </div>
     </div>
 
     <div id="blazor-error-ui">
