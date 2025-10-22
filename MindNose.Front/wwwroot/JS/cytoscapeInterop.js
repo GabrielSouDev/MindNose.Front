@@ -90,9 +90,10 @@ window.cytoscapeInterop = {
             ],
             layout: layoutOptions
         });
-
+        cy._tippies = [];
         this.instances[elementId] = { cy, layoutOptions };
 
+        this.applyTooltips(cy);
         cy.layout(layoutOptions).run();
     },
 
@@ -109,6 +110,28 @@ window.cytoscapeInterop = {
             return;
         }
         cy.add(element);
+        this.applyTooltips(cy);
+
+        cy.on('tap', 'node', function (evt) {
+            const node = evt.target;
+            const label = node.data('label');
+            const nodeId = evt.target.id();
+            DotNet.invokeMethodAsync('MindNose.Front', 'OnNodeLeftClicked', nodeId);
+
+            const selected = node.data('selected') || false;
+            node.data('selected', !selected);
+
+            if (label === 'Term') {
+                node.style('background-color', selected ? '#F16D6D' : '#27F5EE');
+            } else {
+                node.style('background-color', selected ? '#F1BB6D' : '#27F5EE');
+            }
+        });
+
+        cy.on('cxttap', 'node', function (evt) {
+            const nodeId = evt.target.id();
+            DotNet.invokeMethodAsync('MindNose.Front', 'OnNodeRightClicked', nodeId);
+        });
 
         cy.layout(layoutOptions).run();
     },
@@ -126,6 +149,7 @@ window.cytoscapeInterop = {
             return;
         }
         cy.add(elements);
+        this.applyTooltips(cy);
 
         cy.layout(layoutOptions).run();
     },
@@ -142,5 +166,50 @@ window.cytoscapeInterop = {
 
         this.instances[elementId] = { cy, layoutOptions: newLayout };
         cy.layout(newLayout).run();
+    },
+    applyTooltips: function (cy) {
+        // Inicializa o array de tippies se ainda não existir
+        cy._tippies = cy._tippies || [];
+
+        cy.nodes().forEach(function (node) {
+            const content = node.data().extra?.Summary ?? '';
+
+            // Cria o tooltip associado ao container do Cytoscape
+            const tip = tippy(cy.container(), {
+                content: content || '(sem resumo)',
+                trigger: 'manual',
+                placement: 'top',
+                hideOnClick: false,
+                arrow: true,
+                theme: 'light-border',
+            });
+
+            cy._tippies.push(tip);
+
+            // Eventos de hover
+            node.on('mouseover', (e) => {
+                const pos = e.target.renderedPosition();
+                const rect = cy.container().getBoundingClientRect();
+
+                // Converte posição do Cytoscape (canvas) para coordenadas de tela
+                const x = rect.left + pos.x;
+                const y = rect.top + pos.y - 10; // leve deslocamento pra cima
+
+                tip.setProps({
+                    getReferenceClientRect: () => ({
+                        width: 0,
+                        height: 0,
+                        top: y,
+                        bottom: y,
+                        left: x,
+                        right: x,
+                    }),
+                });
+
+                tip.show();
+            });
+
+            node.on('mouseout', () => tip.hide());
+        });
     }
 };

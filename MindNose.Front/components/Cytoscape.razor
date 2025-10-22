@@ -92,4 +92,26 @@
 		await JS.InvokeVoidAsync("cytoscapeInterop.relayout", Id, _layout.ToString());
 		StateHasChanged();
 	}
+
+	[JSInvokable]
+	public static Task OnNodeLeftClicked(string nodeId)
+	{
+		Console.WriteLine($"OnNodeLeftClicked: {nodeId}");
+
+		// Aqui você pode disparar lógica Blazor, como atualizar estado, abrir modal, etc.
+		// Exemplo: salvar em um serviço ou emitir evento
+
+		return Task.CompletedTask;
+	}
+
+	[JSInvokable]
+	public static Task OnNodeRightClicked(string nodeId)
+	{
+		Console.WriteLine($"OnNodeRightClicked: {nodeId}");
+
+		// Aqui você pode disparar lógica Blazor, como atualizar estado, abrir modal, etc.
+		// Exemplo: salvar em um serviço ou emitir evento
+
+		return Task.CompletedTask;
+	}
 }

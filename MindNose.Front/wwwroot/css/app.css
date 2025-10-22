@@ -101,3 +101,20 @@ a, .btn-link {
 code {
     color: #c02d76;
 }
+
+/* Estilo global para todos os tooltips Tippy */
+.tippy-box {
+    font-family: 'Segoe UI', Arial, sans-serif; /* muda a fonte */
+    font-size: 16px; /* tamanho */
+    font-weight: 500; /* peso */
+    background-color: #333; /* cor do balão */
+    color: #fff; /* cor do texto */
+    border-radius: 8px;
+    padding: 6px 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Opcional: seta (triângulo) */
+.tippy-box[data-placement^='top'] > .tippy-arrow::before {
+    color: #333;
+}
