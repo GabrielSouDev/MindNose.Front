@@ -2,8 +2,8 @@
 @inject CytoscapeService CytoscapeService
 @inject MindNoseService MindNoseService
 
-<div style="display: flex; flex-direction:row; text-align: center; align-items:center;">
-	<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Style="width:100%;">
+<RadzenStack Style="height: 100%; margin: 10px;">
+	<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"  Wrap="FlexWrap.NoWrap">
 		<RadzenLabel Style="width:fit-content; white-space: nowrap;" Text="Categoria: " />
 		<RadzenDropDown @bind-Value="@_category"
 						Data="@_categories"
@@ -11,24 +11,23 @@
 						ValueProperty="@nameof(CategoryResponse.Title)" />
 		<RadzenLabel Text="Termo: " />
 		<RadzenTextBox @bind-Value="_term" />
-
+	
 		<RadzenButton Icon="Search" Click="Search" />
 	</RadzenStack>
-</div>
-
-<div id="@Id" style="width:100%; height: 90%; border: 1px solid #ccc"></div>
-
-<div style="display: flex; flex-direction:row; width: fit-content; text-align: center; align-items:center;">
-	<RadzenLabel Text="Layout:&nbsp;&nbsp;&nbsp;" />
-	<RadzenSelectBar @bind-Value="_layout" @onclick="ChangeLayout" TValue="CytoscapeLayout">
-        <Items>
-			@foreach (CytoscapeLayout layoutOption in Enum.GetValues(typeof(CytoscapeLayout)))
-            {
-				<RadzenSelectBarItem Text="@layoutOption.ToString()" Value="@layoutOption" Disabled="false" Visible="true" />
-            }
-        </Items>
-    </RadzenSelectBar>
-</div>''
+	<div id="@Id" style="width:100%; height: 100%; border: 1px solid #ccc"></div>
+	
+	<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Wrap="FlexWrap.NoWrap">
+		<RadzenLabel Text="Layout:&nbsp;&nbsp;&nbsp;" />
+		<RadzenSelectBar @bind-Value="_layout" @onclick="ChangeLayout" TValue="CytoscapeLayout">
+	        <Items>
+				@foreach (CytoscapeLayout layoutOption in Enum.GetValues(typeof(CytoscapeLayout)))
+	            {
+					<RadzenSelectBarItem Text="@layoutOption.ToString()" Value="@layoutOption" Disabled="false" Visible="true" />
+	            }
+	        </Items>
+	    </RadzenSelectBar>
+	</RadzenStack>
+</RadzenStack>
 
 @code {
 	[Parameter] public string Id { get; set; } = "cy";

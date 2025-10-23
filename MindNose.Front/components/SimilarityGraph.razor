@@ -15,7 +15,8 @@
 </RadzenChart>
 
 @code{
-    [Parameter] public ChartTable ChartTable { get; set; } = new();
+	private string a = "a";
+	[Parameter] public ChartTable ChartTable { get; set; } = new();
 
 	string FormatAsPercentage(object value)
 	{

@@ -1,16 +1,16 @@
 ﻿@inject CytoscapeService CytoscapeService
 
-@page "/WeigthsCharts"
+@page "/SimilarityGraph"
 
-<PageTitle>Weigths Charts - MindNose</PageTitle>
+<PageTitle>Grafico de Similaridade - MindNose</PageTitle>
 
 <RadzenStack style="min-height: fit-content;">
     <RadzenRow style="min-height: fit-content;">
         <RadzenColumn Size="12" SizeLG="12" style="min-height: fit-content;">
-			<h2>Similarity Charts</h2>
+            <h2>Grafico de Similaridade</h2>
 			@foreach (var chartElements in _chartTables)
 			{
-                <WeigthsChart ChartTable="chartElements" />
+                <SimilarityGraph ChartTable="chartElements" />
 			}
 		</RadzenColumn>
 	</RadzenRow>
@@ -20,7 +20,7 @@
 
 @code{
     private ElementsDTO _elements = new();
-    private List<ChartTable> _chartTables = new();
+    public List<ChartTable> _chartTables = new();
 
     protected override void OnAfterRender(bool firstRender)
     {
@@ -41,6 +41,7 @@
                 .ToList();
 
             var newChartElements = new List<ChartElement>();
+            var TermChartElements = new List<ChartElement>();
 
             foreach (var edge in edges)
             {
@@ -87,10 +88,12 @@
             _chartTables.Add(new ChartTable
             {
                 Source = sourceTitle,
+                Type = node.Data.Label!,
                 ElementsTarget = newChartElements
             });
-
-            _chartTables = _chartTables.OrderBy(c => c.Source).ToList();
         }
+        _chartTables = _chartTables
+        .OrderByDescending(item => item.Type == "Category")
+        .ToList();
     }
 }

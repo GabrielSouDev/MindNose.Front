@@ -17,11 +17,11 @@
                 <NavMenu />
             </div>
 
-            <RadzenSidebarToggle Icon="Chat" Click="@(() => sidebarExpanded = !sidebarExpanded)" class="rz-m-0" />
+            <RadzenSidebarToggle Icon="Chat" Click="@(() => _sidebarExpanded = !_sidebarExpanded)" class="rz-m-0" />
         </RadzenStack>
     </RadzenHeader>
 
-    <RadzenSidebar style="width: 33vw;" @bind-Expanded="@sidebarExpanded">
+    <RadzenSidebar style="@($"width:{(_sidebarExpanded ? "33vw" : "0")}")">
         <ChatDrawer />
     </RadzenSidebar>
     <RadzenBody Style="height: 98vh; display: flex; flex-direction: column;">
@@ -32,11 +32,15 @@
 <RadzenComponents />
 
 @code {
-    private bool sidebarExpanded;
+    private bool _sidebarExpanded;
 
-    protected override void OnInitialized()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        sidebarExpanded = false;
-        StateHasChanged();
+        if (firstRender)
+        {
+            // força o sidebar a fechar depois da primeira renderização
+            _sidebarExpanded = false;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 }
