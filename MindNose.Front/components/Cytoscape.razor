@@ -10,7 +10,8 @@
 						TextProperty="@nameof(CategoryResponse.Title)"
 						ValueProperty="@nameof(CategoryResponse.Title)" />
 		<RadzenLabel Text="Termo: " />
-		<RadzenTextBox @bind-Value="_term" />
+		<RadzenTextBox Value="@_term" @oninput="e => _term = e.Value?.ToString()"
+					   @onkeyup="HandleKeyUp" />
 	
 		<RadzenButton Icon="Search" Click="Search" />
 	</RadzenStack>
@@ -32,9 +33,10 @@
 @code {
 	[Parameter] public string Id { get; set; } = "cy";
 
+	private DotNetObjectReference<Cytoscape>? _dotNetRef;
 	private List<CategoryResponse> _categories = new();
 	private string _category = string.Empty;
-	private string _term = "Javascript";
+	private string? _term = "Javascript";
 	private string _model = "mistralai/mistral-small-3.2-24b-instruct";
 
 	private CytoscapeLayout _layout;
@@ -50,10 +52,12 @@
 	{
 		if (firstRender)
 		{
-			var elements = CytoscapeService.GetElements();
-			await JS.InvokeVoidAsync("cytoscapeInterop.init", Id, elements, _layout.ToString());
+			_dotNetRef = DotNetObjectReference.Create(this);
+			await JS.InvokeVoidAsync("cytoscapeInterop.setDotNetReference", _dotNetRef);
 
-			StateHasChanged();
+			var elements = CytoscapeService.GetElements();
+			var selectedElements = CytoscapeService.GetSelectedElements();
+			await JS.InvokeVoidAsync("cytoscapeInterop.init", Id, elements, selectedElements, _layout.ToString());
 		}
 	}
 
@@ -85,6 +89,14 @@
 		}
 	}
 
+	private async Task HandleKeyUp(KeyboardEventArgs args)
+	{
+		if (args.Key == "Enter")
+		{
+			await Search();
+		}
+	}
+
 	private async Task ChangeLayout()
 	{
 		CytoscapeService.SetLayout(_layout);
@@ -93,24 +105,23 @@
 	}
 
 	[JSInvokable]
-	public static Task OnNodeLeftClicked(string nodeId)
+	public Task OnNodeLeftClicked(string nodeId)
 	{
-		Console.WriteLine($"OnNodeLeftClicked: {nodeId}");
-
-		// Aqui você pode disparar lógica Blazor, como atualizar estado, abrir modal, etc.
-		// Exemplo: salvar em um serviço ou emitir evento
-
+		var selectedElements = CytoscapeService.GetSelectedElements();
+		if (!selectedElements.Contains(nodeId))
+		{
+			CytoscapeService.AddSelectedElement(nodeId);
+		}else
+		{
+			CytoscapeService.RemoveSelectedElement(nodeId);
+		}
 		return Task.CompletedTask;
 	}
 
 	[JSInvokable]
-	public static Task OnNodeRightClicked(string nodeId)
+	public Task OnNodeRightClicked(string nodeId)
 	{
-		Console.WriteLine($"OnNodeRightClicked: {nodeId}");
-
-		// Aqui você pode disparar lógica Blazor, como atualizar estado, abrir modal, etc.
-		// Exemplo: salvar em um serviço ou emitir evento
-
+		Console.WriteLine($"Clique direito em: {nodeId}");
 		return Task.CompletedTask;
 	}
 }

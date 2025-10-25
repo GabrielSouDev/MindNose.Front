@@ -9,12 +9,14 @@ namespace MindNose.Front.Services;
 public class CytoscapeService
 {
     private CytoscapeDTO _cytoscape;
+    private List<string> _selectedElements;
     private List<CategoryResponse> _categories;
     private CytoscapeLayout _layout;
 
     public CytoscapeService()
     {
         _cytoscape = new();
+        _selectedElements = new();
         _categories = new();
         _layout = CytoscapeLayout.cose;
     }
@@ -29,6 +31,9 @@ public class CytoscapeService
                                                              .DistinctBy(n => n.Data.Id)
                                                              .ToList();
     }
+    public void AddSelectedElement(string elementId) => _selectedElements.Add(elementId);
+    public void RemoveSelectedElement(string elementId) => _selectedElements.Remove(elementId);
+    public List<string> GetSelectedElements() => _selectedElements;
     public ElementsDTO GetElements() => _cytoscape.Elements;
     public void SetLayout(CytoscapeLayout newLayout) => _layout = newLayout;
     public CytoscapeLayout GetLayout() => _layout;
