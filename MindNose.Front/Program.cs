@@ -14,6 +14,7 @@ builder.Services.AddRadzenComponents();
 //builder.HostEnvironment.BaseAddress;
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri( "http://localhost:5000") });
 
+builder.Services.AddScoped<ThemeService>();
 builder.Services.AddScoped<MindNoseService>();
 builder.Services.AddSingleton<CytoscapeService>();
 builder.Services.AddSingleton<OpenRouterService>();

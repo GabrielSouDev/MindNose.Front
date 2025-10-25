@@ -1,29 +1,35 @@
 ﻿@inject NavigationManager NavigationManager
-@inject MindNoseService MindNoseService
 @inject CytoscapeService CytoscapeService
 @inject OpenRouterService OpenRouterService
+@inject ThemeService ThemeService
 
 @inherits LayoutComponentBase
 
 <HeadContent>
-    <RadzenTheme Theme="Humanistic-Dark" />
+    <RadzenTheme Theme="@_currentTheme" />
 </HeadContent>
 
 <RadzenLayout Style="grid-template-columns: 1fr auto; grid-template-areas: 'rz-header rz-header' 'rz-body rz-sidebar'">
     <RadzenHeader Style="height: 2vh;">
         <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center" Gap="1rem">
             <div style="display:flex; flex-direction: row; align-content:center; align-items:center; text-align:center; gap:50px;">
-                <RadzenLabel @onclick="@(() => NavigationManager.NavigateTo("/"))" Style="padding-left: 25px; font-size: x-large; cursor:pointer;" Text="MindNose" />
+                <RadzenLabel @onclick="@(() => NavigationManager.NavigateTo("/"))"
+                             Style="padding-left: 25px; font-size: x-large; cursor:pointer;"
+                             Text="MindNose" />
                 <NavMenu />
             </div>
 
-            <RadzenSidebarToggle Icon="Chat" Click="@(() => _sidebarExpanded = !_sidebarExpanded)" class="rz-m-0" />
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Wrap="FlexWrap.NoWrap">
+                <RadzenButton Icon="Light" Click="ToggleTheme" Style="width:40px; height:40px; border-radius:50%; padding:0; text-align:center;" />
+                <RadzenSidebarToggle Icon="Chat" Click="@(() => _sidebarExpanded = !_sidebarExpanded)" class="rz-m-0" />
+            </RadzenStack>
         </RadzenStack>
     </RadzenHeader>
 
-    <RadzenSidebar style="@($"width:{(_sidebarExpanded ? "33vw" : "0")}")">
+    <RadzenSidebar Style="@($"width:{(_sidebarExpanded ? "33vw" : "0")}")">
         <ChatDrawer />
     </RadzenSidebar>
+
     <RadzenBody Style="height: 98vh; display: flex; flex-direction: column;">
         @Body
     </RadzenBody>
@@ -33,14 +39,18 @@
 
 @code {
     private bool _sidebarExpanded;
+    private string _currentTheme = "Material-Dark";
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override void OnInitialized()
     {
-        if (firstRender)
-        {
-            // força o sidebar a fechar depois da primeira renderização
-            _sidebarExpanded = false;
-            await InvokeAsync(StateHasChanged);
-        }
+        ThemeService.SetTheme(_currentTheme);
+    }
+    
+    private void ToggleTheme()
+    {
+        _currentTheme = (_currentTheme == "Software") ? "Material-Dark" : "Software";
+        ThemeService.SetTheme(_currentTheme);
+
+        StateHasChanged();
     }
 }

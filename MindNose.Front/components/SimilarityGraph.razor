@@ -1,7 +1,7 @@
 ﻿@inject CytoscapeService CytoscapeService
 
 <h4 style="align-items: center; text-align: center;">@ChartTable.Source</h4>
-<RadzenChart Style="margin-bottom: 50px; margin-top: -40px; min-height: fit-content;">
+<RadzenChart Style="@($"height: {Math.Min(Math.Max(ChartTable.ElementsTarget.Count * 25, 300), 800)}px; margin-bottom: 50px; margin-top: -40px;")" >
 	<RadzenBarSeries Data="@ChartTable.ElementsTarget" CategoryProperty="@nameof(ChartElement.Target)" Title="@ChartTable.Source"LineType="LineType.Solid" ValueProperty="@nameof(ChartElement.WeigthPorcent)">
 		<RadzenSeriesDataLabels Visible="true" />
 	</RadzenBarSeries>
@@ -11,7 +11,7 @@
 	    <RadzenAxisTitle Text="Weigths Origin to Destiny Terms" />
     </RadzenValueAxis>
 
-    <RadzenBarOptions Radius="5" Height="10"  />
+	<RadzenBarOptions Radius="5" Height="8" Margin="12" />
 </RadzenChart>
 
 @code{

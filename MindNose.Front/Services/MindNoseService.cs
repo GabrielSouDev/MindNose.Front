@@ -64,8 +64,6 @@ public class MindNoseService
 
         throw new Exception();
     }
-
-
 }
 
 public class CategoryResponse

@@ -17,38 +17,39 @@
         </RadzenStack>
     </RadzenCard>
 
-    <!-- Tabela -->
-    @if (filteredModels != null)
-    {
-        <RadzenDataGrid Data="@filteredModels" TItem="Model"
-                        ColumnWidth="200px"
-                        AllowPaging="true"
-                        PageSize="@pageSize"
-                        PageSizeChanged="@((int size) => pageSize = size)"
-                        PageSizeOptions="@pageSizeOptions"
-                        PagerPosition="PagerPosition.Bottom"
-                        AllowSorting="true"
-                        Style="height: auto; min-height: 500px;">
-            <Columns>
-                @foreach (var column in visibleColumns.Where(c => c.Value))
-                {
-                    var meta = ColumnMeta[column.Key];
-                    var sortable = !new[] { "InputModalities", "OutputModalities", "InstructType" }.Contains(column.Key);
+    <RadzenCard>
+        <!-- Tabela -->
+        @if (filteredModels != null)
+        {
+            <RadzenDataGrid Data="@filteredModels" TItem="Model"
+                            ColumnWidth="200px"
+                            AllowPaging="true"
+                            PageSize="@pageSize"
+                            PageSizeChanged="@((int size) => pageSize = size)"
+                            PageSizeOptions="@pageSizeOptions"
+                            PagerPosition="PagerPosition.Bottom"
+                            AllowSorting="true"
+                            Style="height: auto; min-height: 500px;">
+                <Columns>
+                    @foreach (var column in visibleColumns.Where(c => c.Value))
+                    {
+                        var meta = ColumnMeta[column.Key];
+                        var sortable = !new[] { "InputModalities", "OutputModalities", "InstructType" }.Contains(column.Key);
 
-                    <RadzenDataGridColumn Title="@meta.PrettyName"
-                                          Property="@meta.PropertyPath"
-                                          Sortable="@sortable">
-                        <Template Context="Model">
-                            <span title="@meta.ValueSelector(Model)">
-                                @meta.ValueSelector(Model)
-                            </span>
-                        </Template>
-                    </RadzenDataGridColumn>
-                }
-            </Columns>
-        </RadzenDataGrid>
-    }
-
+                        <RadzenDataGridColumn Title="@meta.PrettyName"
+                                              Property="@meta.PropertyPath"
+                                              Sortable="@sortable">
+                            <Template Context="Model">
+                                <span title="@meta.ValueSelector(Model)">
+                                    @meta.ValueSelector(Model)
+                                </span>
+                            </Template>
+                        </RadzenDataGridColumn>
+                    }
+                </Columns>
+            </RadzenDataGrid>
+        }
+    </RadzenCard>
 </RadzenStack>
 
 @code {

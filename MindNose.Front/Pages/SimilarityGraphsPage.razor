@@ -1,20 +1,21 @@
 ﻿@inject CytoscapeService CytoscapeService
 
 @page "/SimilarityGraph"
-
 <PageTitle>Grafico de Similaridade - MindNose</PageTitle>
 
-<RadzenStack style="min-height: fit-content;">
-    <RadzenRow style="min-height: fit-content;">
-        <RadzenColumn Size="12" SizeLG="12" style="min-height: fit-content;">
-            <h2>Grafico de Similaridade</h2>
-			@foreach (var chartElements in _chartTables)
-			{
-                <SimilarityGraph ChartTable="chartElements" />
-			}
-		</RadzenColumn>
-	</RadzenRow>
-</RadzenStack>
+<RadzenCard>
+    <RadzenStack style="min-height: fit-content;">
+        <RadzenRow style="min-height: fit-content;">
+            <RadzenColumn Size="12" SizeLG="12" style="min-height: fit-content;">
+                <h2>Grafico de Similaridade</h2>
+			    @foreach (var chartElements in _chartTables)
+			    {
+                    <SimilarityGraph ChartTable="chartElements" />
+			    }
+		    </RadzenColumn>
+	    </RadzenRow>
+    </RadzenStack>
+</RadzenCard>
 
 
 
