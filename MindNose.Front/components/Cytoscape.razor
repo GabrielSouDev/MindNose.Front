@@ -3,7 +3,7 @@
 @inject MindNoseService MindNoseService
 
 <RadzenStack Style="height: 100%; margin: 10px;">
-	<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"  Wrap="FlexWrap.NoWrap">
+	<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Wrap="FlexWrap.NoWrap">
 		<RadzenLabel Style="width:fit-content; white-space: nowrap;" Text="Categoria: " />
 		<RadzenDropDown @bind-Value="@_category"
 						Data="@_categories"
@@ -12,21 +12,37 @@
 		<RadzenLabel Text="Termo: " />
 		<RadzenTextBox Value="@_term" @oninput="e => _term = e.Value?.ToString()"
 					   @onkeyup="HandleKeyUp" />
-	
-		<RadzenButton Icon="Search" Click="Search" />
+
+		<RadzenButton Icon="Search" Click="@(() => Search(null))" />
 	</RadzenStack>
-	<div id="@Id" style="width:100%; height: 100%; border: 1px solid #ccc"></div>
-	
+
+	<div @oncontextmenu:preventDefault id="@Id" style="width:100%; height: 100%; border: 1px solid #ccc">
+		<div style="
+			display: @( _isLoading ? "flex" : "none" );
+			position: absolute;
+			inset: 0; /* top:0; left:0; right:0; bottom:0 */
+			background-color: rgba(255, 255, 255, 0.7);
+			backdrop-filter: saturate(50%);
+			justify-content: center;
+			align-items: center;
+			font-size: 2rem;
+			color: #333;
+			z-index: 10;
+		">
+			<div>Pensando<span class="typing">...</span></div>
+		</div>
+	</div>
+
 	<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Wrap="FlexWrap.NoWrap">
 		<RadzenLabel Text="Layout:&nbsp;&nbsp;&nbsp;" />
 		<RadzenSelectBar @bind-Value="_layout" @onclick="ChangeLayout" TValue="CytoscapeLayout">
-	        <Items>
+			<Items>
 				@foreach (CytoscapeLayout layoutOption in Enum.GetValues(typeof(CytoscapeLayout)))
-	            {
+				{
 					<RadzenSelectBarItem Text="@layoutOption.ToString()" Value="@layoutOption" Disabled="false" Visible="true" />
-	            }
-	        </Items>
-	    </RadzenSelectBar>
+				}
+			</Items>
+		</RadzenSelectBar>
 	</RadzenStack>
 </RadzenStack>
 
@@ -34,10 +50,12 @@
 	[Parameter] public string Id { get; set; } = "cy";
 
 	private DotNetObjectReference<Cytoscape>? _dotNetRef;
+	private ElementsDTO _elements = new();
 	private List<CategoryResponse> _categories = new();
 	private string _category = string.Empty;
 	private string? _term = "Javascript";
 	private string _model = "mistralai/mistral-small-3.2-24b-instruct";
+	private bool _isLoading = true; // mantive true para mostrar overlay durante a inicialização (pode trocar para false)
 
 	private CytoscapeLayout _layout;
 
@@ -55,39 +73,71 @@
 			_dotNetRef = DotNetObjectReference.Create(this);
 			await JS.InvokeVoidAsync("cytoscapeInterop.setDotNetReference", _dotNetRef);
 
-			var elements = CytoscapeService.GetElements();
+			_elements = CytoscapeService.GetElements();
 			var selectedElements = CytoscapeService.GetSelectedElements();
-			await JS.InvokeVoidAsync("cytoscapeInterop.init", Id, elements, selectedElements, _layout.ToString());
-		}
-	}
+			await JS.InvokeVoidAsync("cytoscapeInterop.init", Id, _elements, selectedElements, _layout.ToString());
 
-	public async Task Search()
-	{
-		if (!string.IsNullOrEmpty(_category) && !string.IsNullOrEmpty(_term))
-		{
-			var request = new
-			{
-				category = _category,
-				term = _term,
-				llmModel = _model
-			};
-			ElementsDTO elements = new();
-			try
-			{
-				elements = await MindNoseService.CreateOrGetLink(request);
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine($"Erro ao realizar requisição:\n   {ex.Message}");
-				return;
-			}
-
-			CytoscapeService.AddElements(elements);
-			await JS.InvokeVoidAsync("cytoscapeInterop.add", Id, elements);
-
+			// Agora que a inicialização JS terminou, escondemos o loading e forçamos re-render
+			_isLoading = false;
 			StateHasChanged();
 		}
 	}
+
+	public async Task Search(string? nodeId = null)
+	{
+		// evita concorrência de buscas — se quer permitir concorrência, remova essa checagem
+		if (_isLoading) return;
+
+		_isLoading = true;
+		StateHasChanged();         // força o Blazor a redesenhar para mostrar o overlay
+		await Task.Yield();        // dá chance pro browser pintar antes de iniciar o trabalho assíncrono pesado
+
+		try
+		{
+			if (!string.IsNullOrEmpty(_category) && (!string.IsNullOrEmpty(_term) || nodeId is not null))
+			{
+				string termRequest = string.Empty;
+				if (!string.IsNullOrEmpty(_term))
+					termRequest = _term;
+
+				if (nodeId is not null)
+				{
+					var selectedElement = _elements.Nodes.Find(n => n.Data.Id == nodeId);
+					termRequest = selectedElement!.Data.Extra!["Title"].ToString()!;
+				}
+
+				var request = new
+				{
+					category = _category,
+					term = termRequest,
+					llmModel = _model
+				};
+
+				ElementsDTO elements = new();
+				try
+				{
+					elements = await MindNoseService.CreateOrGetLink(request);
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"Erro ao realizar requisição:\n   {ex.Message}");
+					// opcional: mostrar erro para o usuário via Toast/Diálogo
+					return;
+				}
+
+				CytoscapeService.AddElements(elements);
+				_elements.Nodes.AddRange(elements.Nodes);
+				_elements.Edges.AddRange(elements.Edges);
+				await JS.InvokeVoidAsync("cytoscapeInterop.add", Id, elements);
+			}
+		}
+		finally
+		{
+			_isLoading = false;
+			StateHasChanged(); // atualiza a UI escondendo o overlay
+		}
+	}
+
 
 	private async Task HandleKeyUp(KeyboardEventArgs args)
 	{
@@ -111,7 +161,8 @@
 		if (!selectedElements.Contains(nodeId))
 		{
 			CytoscapeService.AddSelectedElement(nodeId);
-		}else
+		}
+		else
 		{
 			CytoscapeService.RemoveSelectedElement(nodeId);
 		}
@@ -119,9 +170,9 @@
 	}
 
 	[JSInvokable]
-	public Task OnNodeRightClicked(string nodeId)
+	public async Task OnNodeRightClicked(string nodeId)
 	{
-		Console.WriteLine($"Clique direito em: {nodeId}");
-		return Task.CompletedTask;
+		// chama Search com nodeId — seguirá o fluxo de loading
+		await Search(nodeId);
 	}
 }
