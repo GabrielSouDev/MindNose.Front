@@ -77,7 +77,6 @@
 			var selectedElements = CytoscapeService.GetSelectedElements();
 			await JS.InvokeVoidAsync("cytoscapeInterop.init", Id, _elements, selectedElements, _layout.ToString());
 
-			// Agora que a inicialização JS terminou, escondemos o loading e forçamos re-render
 			_isLoading = false;
 			StateHasChanged();
 		}
@@ -85,11 +84,10 @@
 
 	public async Task Search(string? nodeId = null)
 	{
-		// evita concorrência de buscas — se quer permitir concorrência, remova essa checagem
 		if (_isLoading) return;
 
 		_isLoading = true;
-		StateHasChanged();         // força o Blazor a redesenhar para mostrar o overlay
+		StateHasChanged(); 
 		await Task.Yield();        // dá chance pro browser pintar antes de iniciar o trabalho assíncrono pesado
 
 		try
@@ -121,7 +119,6 @@
 				catch (Exception ex)
 				{
 					Console.WriteLine($"Erro ao realizar requisição:\n   {ex.Message}");
-					// opcional: mostrar erro para o usuário via Toast/Diálogo
 					return;
 				}
 
@@ -134,7 +131,7 @@
 		finally
 		{
 			_isLoading = false;
-			StateHasChanged(); // atualiza a UI escondendo o overlay
+			StateHasChanged();
 		}
 	}
 
@@ -172,7 +169,6 @@
 	[JSInvokable]
 	public async Task OnNodeRightClicked(string nodeId)
 	{
-		// chama Search com nodeId — seguirá o fluxo de loading
 		await Search(nodeId);
 	}
 }
