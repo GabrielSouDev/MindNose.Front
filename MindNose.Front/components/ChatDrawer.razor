@@ -1,5 +1,8 @@
 @using ChatMessage = Models.IAChat.ChatMessage
+
+@inject CytoscapeService CytoscapeService
 @inject OpenRouterService OpenRouterService
+@inject MindNoseService MindNoseService
 
 <RadzenStack Style="height: 100%;">
     <RadzenCard Style="height: 100%; display: flex; flex-direction: column;">
@@ -9,27 +12,28 @@
                 @if (message.Origin == IAChatOrigin.System)
                 {
                     <div style="width: 100%; display: flex; justify-content: flex-start;">
-                        <div style="background-color: palevioletred; color: white; 
+                        <div style="background-color: darkgrey; color: white; 
 									width: fit-content; text-align: start; padding: 8px; 
 									border-radius: 10px; margin: 4px;">
-							<p style="margin: 0; white-space: pre-wrap;">@message.Text</p>
-                            <p style="margin: 0; font-size: 0.8em;">IA Chat</p>
+							<p class="chat" style="margin: 0; white-space: pre-wrap;">@((MarkupString)message.Text!)</p>
+							<p style="margin: 0; font-size: 0.8em;">IA Chat</p>
                         </div>
                     </div>
                 }
                 else
                 {
                     <div style="width: 100%; display: flex; justify-content: flex-end;">
-                        <div style="background-color: lightgreen; color: darkgreen; 
+                        <div style="background-color: darkgray; color: darkgreen; 
 									width: fit-content; text-align: end; padding: 8px; 
 									border-radius: 10px; margin: 4px;">
-							<p style="margin: 0; white-space: pre-wrap;">@message.Text</p>
+							<p class="chat" style="margin: 0; white-space: pre-wrap;">@message.Text</p>
                             <p style="margin: 0; font-size: 0.8em;">@message.Origin</p>
                         </div>
                     </div>
                 }
             }
         </div>
+
 
         <div style="padding: 10px; border-top: 1px solid #ccc;">
             <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Style="width:100%;">
@@ -43,15 +47,17 @@
 
 			<RadzenTextArea Placeholder="Escreva sua mensagem." 
 				Value="@_textBox.Text" @oninput="e => _textBox.Text = e.Value?.ToString()" 
-				@onkeyup="HandleKeyUp" 
+				@onkeyup="HandleKeyUpAsync" 
 				Style="width: 100%;" />
-            <RadzenButton Text="Enviar" Click="Submit"
+            <RadzenButton Text="Enviar" Click="SubmitAsync"
 				Style="margin-top: 10px; margin-bottom: 10px;" />
         </div>
     </RadzenCard>
 </RadzenStack>
 
 @code{
+	private List<string>_selectedElements = new();
+	private ElementsDTO _elements = new();
 	private List<ModelChat> _modelsChat = new();
 	private ChatMessage _chatMessage = new();
 	private string _selectedModelId = string.Empty;
@@ -65,6 +71,8 @@
 
 	protected override void OnParametersSet()
 	{
+		_selectedElements = CytoscapeService.GetSelectedElements();
+		_elements = CytoscapeService.GetElements();
 		var models = OpenRouterService.GetModels();
 		if (models?.Data != null && models.Data.Any())
 		{
@@ -88,19 +96,47 @@
 		StateHasChanged();
 	}
 
-	private void Submit()
+	private async Task SubmitAsync()
 	{
 		if(!string.IsNullOrEmpty(_textBox.Text))
 			_chatMessage.Messages.Add(new Message { Text = _textBox.Text, Origin = IAChatOrigin.User });
 
+		var selectedElements = _elements.Nodes.Where(e => _selectedElements.Contains(e.Data.Id)).ToList();
+
+		var selectedHeader = selectedElements
+								.OrderBy(sh => sh.Data.Label == "Category")
+								.Select(e =>
+									new ElementsHeader
+									{
+										Title = e.Data.Extra!["Title"].ToString()!,
+										Summary = e.Data.Extra["Summary"].ToString()!,
+										Type = e.Data.Label!
+									}
+								).ToList();
+
+		var request = new ChatRequest
+		{
+			ElementsHeader = selectedHeader,
+			Message = _textBox,
+			Model = _selectedModelId
+		};
 		_textBox.Text = string.Empty;
+
+		_chatMessage.Messages.Add(new Message { Text = "Pensando..", Origin = IAChatOrigin.System });
+
+		var response = await MindNoseService.SendChatAsync(request);
+
+		_chatMessage.Messages.RemoveAt(_chatMessage.Messages.Count - 1);
+
+		if (!string.IsNullOrEmpty(response))
+			_chatMessage.Messages.Add(new Message { Text = Markdown.ToHtml(response), Origin = IAChatOrigin.System });
 	}
 
-	private void HandleKeyUp(KeyboardEventArgs args)
+	private async Task HandleKeyUpAsync(KeyboardEventArgs args)
 	{
 		if (args.Key == "Enter" && !args.ShiftKey)
 		{
-			Submit();
+			await SubmitAsync();
 		}
 	}
 }

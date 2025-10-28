@@ -1,9 +1,11 @@
 ﻿using MindNose.Front.Models.Cytoscape;
+using MindNose.Front.Models.IAChat;
 using MindNose.Front.Models.LLMModels;
 using Newtonsoft.Json;
 using System.Net.Http.Json;
 using System.Reflection;
 using System.Text;
+using static MindNose.Front.components.ChatDrawer;
 
 namespace MindNose.Front.Services;
 public class MindNoseService
@@ -63,6 +65,23 @@ public class MindNoseService
             return categories;
 
         throw new Exception();
+    }
+
+    public async Task<string> SendChatAsync(ChatRequest request)
+    {
+        var json = JsonConvert.SerializeObject(request);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        var response = await _httpClient.PostAsync("api/MindNoseCore/SendAIChat", content);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            return responseContent;
+        }
+        else
+            throw new Exception();
     }
 }
 

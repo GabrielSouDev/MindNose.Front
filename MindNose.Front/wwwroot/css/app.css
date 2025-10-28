@@ -1,3 +1,17 @@
+:root {
+    --rz-primary: #6f42c1; /* Roxo principal (comercial, elegante) */
+    --rz-secondary: #5a32a3; /* Roxo escuro para contraste */
+    --rz-success: #7d5bbe; /* Roxo suave para sucesso */
+    --rz-info: #8e6cd1; /* Roxo claro para info */
+    --rz-warning: #a88ae0; /* Roxo pastel para alerta */
+    --rz-danger: #4b2c91; /* Roxo profundo para erro */
+    --rz-light: #f3f0fa; /* Fundo claro com tom lilás */
+    --rz-dark: #2e1f4d; /* Fundo escuro roxo profundo */
+    --rz-text-color: #2e1f4d; /* Texto em roxo escuro */
+    --rz-border-radius: 6px; /* Arredondamento suave */
+}
+
+
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
@@ -191,3 +205,47 @@ a, .btn-link {
         border-color: transparent
     }
 }
+
+.chat {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #333;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+    /* Títulos com menos margem */
+    .chat h1, .chat h2, .chat h3 {
+        margin-top: 0;
+        margin-bottom: 0;
+        font-weight: 600;
+        font-size: 1.4em;
+        line-height: 1.2;
+    }
+
+    /* Parágrafos mais compactos */
+    .chat p {
+        margin: 0;
+    }
+
+    /* Listas mais enxutas */
+    .chat ul, .chat ol {
+        margin: 0.3em 0 0.3em 1.2em;
+        padding: 0;
+    }
+
+    /* Negrito e itálico */
+    .chat strong {
+        font-weight: bold;
+    }
+
+    .chat em {
+        font-style: italic;
+    }
+
+    /* Links */
+    .chat a {
+        color: #4a00e0;
+        text-decoration: underline;
+    }
