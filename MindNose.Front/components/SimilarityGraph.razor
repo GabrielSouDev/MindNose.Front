@@ -1,7 +1,7 @@
 ﻿@inject CytoscapeService CytoscapeService
 
 <h4 style="align-items: center; text-align: center;">@ChartTable.Source</h4>
-<RadzenChart Style="@($"height: {Math.Min(Math.Max(ChartTable.ElementsTarget.Count * 25, 300), 800)}px; margin-bottom: 50px; margin-top: -40px;")" >
+<RadzenChart Style=@($"height: {ChartHeight}; margin-bottom: 50px; margin-top: -40px;")>
 	<RadzenBarSeries Data="@ChartTable.ElementsTarget" CategoryProperty="@nameof(ChartElement.Target)" Title="@ChartTable.Source"LineType="LineType.Solid" ValueProperty="@nameof(ChartElement.WeigthPorcent)">
 		<RadzenSeriesDataLabels Visible="true" />
 	</RadzenBarSeries>
@@ -15,8 +15,8 @@
 </RadzenChart>
 
 @code{
-	private string a = "a";
 	[Parameter] public ChartTable ChartTable { get; set; } = new();
+	private string ChartHeight => $"{Math.Min(Math.Max(ChartTable.ElementsTarget.Count * 25, 300), 800)}px";
 
 	string FormatAsPercentage(object value)
 	{

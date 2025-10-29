@@ -39,10 +39,10 @@
         {
             var edges = _elements.Edges
                 .Where(e => e.Data.Source == node.Data.Id)
+                .DistinctBy(e => e.Data.Id)
                 .ToList();
 
             var newChartElements = new List<ChartElement>();
-            var TermChartElements = new List<ChartElement>();
 
             foreach (var edge in edges)
             {
@@ -95,6 +95,7 @@
         }
         _chartTables = _chartTables
         .OrderByDescending(item => item.Type == "Category")
+        .DistinctBy(c => c.Source)
         .ToList();
     }
 }
