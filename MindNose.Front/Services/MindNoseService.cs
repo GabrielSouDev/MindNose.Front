@@ -3,9 +3,7 @@ using MindNose.Front.Models.IAChat;
 using MindNose.Front.Models.LLMModels;
 using Newtonsoft.Json;
 using System.Net.Http.Json;
-using System.Reflection;
 using System.Text;
-using static MindNose.Front.components.ChatDrawer;
 
 namespace MindNose.Front.Services;
 public class MindNoseService

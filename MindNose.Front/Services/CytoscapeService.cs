@@ -1,8 +1,10 @@
 ﻿using MindNose.Front.Models.Cytoscape;
 using MindNose.Front.Models.Enum;
+using MindNose.Front.Models.IAChat;
 using Radzen.Blazor.Markdown;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Xml.Linq;
 
 namespace MindNose.Front.Services;
 
@@ -39,4 +41,24 @@ public class CytoscapeService
     public CytoscapeLayout GetLayout() => _layout;
     public void SetCategories(List<CategoryResponse> categories) => _categories = categories;
     public List<CategoryResponse> GetCategories() => _categories;
+    public List<ElementHeader> GetSelectedElementsHeader()
+    {
+        if (_selectedElements is not null)
+        {
+            var selectedElements = _cytoscape.Elements.Nodes.Where(e => _selectedElements.Contains(e.Data.Id)).ToList();
+            var selectedHeader = selectedElements
+                        .OrderBy(sh => sh.Data.Label == "Category")
+                        .Select(e =>
+                            new ElementHeader
+                            {
+                                Title = e.Data.Extra!["Title"].ToString()!,
+                                Summary = e.Data.Extra["Summary"].ToString()!,
+                                Type = e.Data.Label!
+                            }
+                        ).ToList();
+
+            return selectedHeader;
+        }
+        return new();
+    }
 }

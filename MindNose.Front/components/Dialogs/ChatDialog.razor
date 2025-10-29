@@ -3,6 +3,11 @@
 @inject CytoscapeService CytoscapeService
 @inject OpenRouterService OpenRouterService
 @inject MindNoseService MindNoseService
+@inject DialogService DialogService
+
+<div hidden="@_selectedElementsHidden">
+	<SelectedElements />
+</div>
 
 <RadzenStack Style="height: 100%;">
 	<RadzenCard Style="height: 100%; display: flex; flex-direction: column;">
@@ -56,8 +61,7 @@
 </RadzenStack>
 
 @code{
-	private List<string>_selectedElements = new();
-	private ElementsDTO _elements = new();
+	private bool _selectedElementsHidden = true;
 	private List<ModelChat> _modelsChat = new();
 	private ChatMessage _chatMessage = new();
 	private string _selectedModelId = string.Empty;
@@ -69,10 +73,14 @@
 
 	private bool _preventDefaultEnter = false;
 
+	protected override void OnAfterRender(bool firstRender)
+	{
+		if (firstRender)
+			_selectedElementsHidden = (CytoscapeService.GetSelectedElements().Count > 0) ? false : true;
+	}
+
 	protected override void OnParametersSet()
 	{
-		_selectedElements = CytoscapeService.GetSelectedElements();
-		_elements = CytoscapeService.GetElements();
 		var models = OpenRouterService.GetModels();
 		if (models?.Data != null && models.Data.Any())
 		{
@@ -101,28 +109,14 @@
 		if(!string.IsNullOrEmpty(_textBox.Text))
 			_chatMessage.Messages.Add(new Message { Text = _textBox.Text, Origin = IAChatOrigin.User });
 
+		var selectedElementsHeader = CytoscapeService.GetSelectedElementsHeader();
+
 		var request = new ChatRequest
 			{
+				ElementsHeader = selectedElementsHeader,
 				Message = _textBox,
 				Model = _selectedModelId
 			};
-
-		if (_selectedElements is not null)
-		{
-			var selectedElements = _elements.Nodes.Where(e => _selectedElements.Contains(e.Data.Id)).ToList();
-			var selectedHeader = selectedElements
-						.OrderBy(sh => sh.Data.Label == "Category")
-						.Select(e =>
-							new ElementsHeader
-								{
-									Title = e.Data.Extra!["Title"].ToString()!,
-									Summary = e.Data.Extra["Summary"].ToString()!,
-									Type = e.Data.Label!
-								}
-						).ToList();
-			request.ElementsHeader = selectedHeader;
-		}
-
 
 		_textBox.Text = string.Empty;
 
