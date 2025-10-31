@@ -65,7 +65,7 @@
 
 			<div style="display: flex; justify-content: flex-end; padding: 10px 0;">
 				<RadzenButton Text="Enviar" Click="SubmitAsync" 
-					Style="margin-top: 10px; margin-bottom: 10px;" />
+				Style="margin-top: 10px; margin-bottom: 10px;" />
 			</div>
 		</div>
 	</RadzenCard>
@@ -89,7 +89,7 @@
 		var models = OpenRouterService.GetChatModels();
 		if (models?.Data != null && models.Data.Any())
 		{
-			_modelsChat = models.Data.Select(d => new ModelChat(d.Id, d.Name)).ToList();
+			_modelsChat = models.Data.Select(m => new ModelChat(m.Id, m.Name)).OrderBy(m => m.Name).ToList();
 
 			var model = _modelsChat.FirstOrDefault(m => m.Id == "mistralai/mistral-small-3.2-24b-instruct");
 			if (model is not null)
@@ -98,6 +98,7 @@
 			}
 			else
 				_selectedModelId = _modelsChat.First().Id;
+
 		}
 	}
 
