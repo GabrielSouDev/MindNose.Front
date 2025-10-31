@@ -51,11 +51,13 @@ public class CytoscapeService
                         .Select(e =>
                             new ElementHeader
                             {
+                                Id = e.Data.Id,
                                 Title = e.Data.Extra!["Title"].ToString()!,
                                 Summary = e.Data.Extra["Summary"].ToString()!,
                                 Type = e.Data.Label!
-                            }
-                        ).ToList();
+                            })
+                        .DistinctBy(e => e.Id)
+                        .ToList();
 
             return selectedHeader;
         }

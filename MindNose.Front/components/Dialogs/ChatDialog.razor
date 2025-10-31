@@ -6,10 +6,14 @@
 @inject DialogService DialogService
 
 <div hidden="@_selectedElementsHidden">
+	<div style="display: flex; justify-content: flex-end; padding: 10px 0;">
+		<RadzenButton Icon="Close" Click="ToggleSelectedElements" Variant="Variant.Filled"  />
+	</div>
+
 	<SelectedElements />
 </div>
 
-<RadzenStack Style="height: 100%;">
+<RadzenStack Style="height: 100%;" Visible="_selectedElementsHidden">
 	<RadzenCard Style="height: 100%; display: flex; flex-direction: column;">
 		<div style="flex: 1; overflow-y: auto; padding: 10px; display:flex; flex-direction:column;">
 			@foreach (var message in _chatMessage.Messages)
@@ -39,7 +43,6 @@
 			}
 		</div>
 
-
 		<div style="padding: 10px; border-top: 1px solid #ccc;">
 			<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Style="width:100%;">
 				<RadzenLabel Style="width:fit-content; white-space: nowrap;" Text="Select Model: " />
@@ -49,13 +52,19 @@
 				ValueProperty="@nameof(ModelChat.Id)"
 				Style="width: 100%;" />
 			</RadzenStack>
+			<div style="display: flex; justify-content: flex-end; padding: 10px 0;">
+				<RadzenButton Text="Elementos Selecionados" Click="ToggleSelectedElements" />
+			</div>
 
 			<RadzenTextArea Placeholder="Escreva sua mensagem." 
 			Value="@_textBox.Text" @oninput="e => _textBox.Text = e.Value?.ToString()" 
 			@onkeyup="HandleKeyUpAsync" 
 			Style="width: 100%;" />
-			<RadzenButton Text="Enviar" Click="SubmitAsync"
-			Style="margin-top: 10px; margin-bottom: 10px;" />
+
+			<div style="display: flex; justify-content: flex-end; padding: 10px 0;">
+				<RadzenButton Text="Enviar" Click="SubmitAsync" 
+					Style="margin-top: 10px; margin-bottom: 10px;" />
+			</div>
 		</div>
 	</RadzenCard>
 </RadzenStack>
@@ -72,12 +81,6 @@
 	};
 
 	private bool _preventDefaultEnter = false;
-
-	protected override void OnAfterRender(bool firstRender)
-	{
-		if (firstRender)
-			_selectedElementsHidden = (CytoscapeService.GetSelectedElements().Count > 0) ? false : true;
-	}
 
 	protected override void OnParametersSet()
 	{
@@ -136,5 +139,12 @@
 		{
 			await SubmitAsync();
 		}
+	}
+
+	private void ToggleSelectedElements()
+	{
+
+		_selectedElementsHidden = !_selectedElementsHidden;
+		StateHasChanged();
 	}
 }

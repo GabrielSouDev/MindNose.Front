@@ -2,9 +2,30 @@
 
 <RadzenStack Style=@($"height: {Style}%; width: 100%; ")>
 	<RadzenCard Style="height: 100%; display: flex; flex-direction: column;">
-		@foreach (var element in _selectedElementsHeader)
+		@if (_selectedElementsHeader.Count == 0)
 		{
-			<div>@element.Title</div>
+			<h6>Não há elementos Selecionados!</h6>
+		}else
+		{
+			<h6 style="text-align:center;">Elementos Selecionados</h6>
+		}
+
+		@foreach (var type in new[] { "Category", "Term" })
+		{
+			var element = _selectedElementsHeader.FirstOrDefault(e => e.Type == type);
+			if (!string.IsNullOrEmpty(element?.Title))
+			{
+				<p>@(type == "Category" ? "Categorias:" : "Termos:")</p>
+			}
+
+			foreach (var item in _selectedElementsHeader.Where(e => e.Type == type))
+			{
+				<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px dashed #000; margin-bottom: 5px;">
+					<span>@item.Title</span>
+					<RadzenButton Text="Remover" Click="@(() => RemoveSelectedElement(item.Id))" />
+				</div>
+			}
+			<br/>
 		}
 	</RadzenCard>
 </RadzenStack>
@@ -16,5 +37,12 @@
 	protected override void OnInitialized()
 	{
 		_selectedElementsHeader = CytoscapeService.GetSelectedElementsHeader();
+	}
+	private void RemoveSelectedElement(string elementId)
+	{
+		CytoscapeService.RemoveSelectedElement(elementId);
+		var selectedElement = _selectedElementsHeader.First(e => e.Id == elementId);
+		_selectedElementsHeader.Remove(selectedElement);
+		StateHasChanged();
 	}
 }
