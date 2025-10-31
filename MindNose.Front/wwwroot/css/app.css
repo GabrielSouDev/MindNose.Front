@@ -1,15 +1,5 @@
-:root {
-    --rz-primary: #6f42c1; /* Roxo principal (comercial, elegante) */
-    --rz-secondary: #5a32a3; /* Roxo escuro para contraste */
-    --rz-success: #7d5bbe; /* Roxo suave para sucesso */
-    --rz-info: #8e6cd1; /* Roxo claro para info */
-    --rz-warning: #a88ae0; /* Roxo pastel para alerta */
-    --rz-danger: #4b2c91; /* Roxo profundo para erro */
-    --rz-light: #f3f0fa; /* Fundo claro com tom lilás */
-    --rz-dark: #2e1f4d; /* Fundo escuro roxo profundo */
-    --rz-text-color: #2e1f4d; /* Texto em roxo escuro */
-    --rz-border-radius: 6px; /* Arredondamento suave */
-}
+
+
 
 
 html, body {

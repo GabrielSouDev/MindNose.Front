@@ -14,37 +14,46 @@
 </HeadContent>
 
 <RadzenLayout Style="grid-template-columns: 1fr auto; grid-template-areas: 'rz-header rz-header' 'rz-body rz-sidebar'">
-    <RadzenHeader Style="height: 2vh;">
+    <RadzenHeader Style="height: 2vh; padding: 10px 25px; margin-bottom: 5px;">
         <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center" Gap="1rem">
             <div style="display:flex; flex-direction: row; align-content:center; align-items:center; text-align:center; gap:50px;">
                 <RadzenLabel @onclick="@(() => NavigationManager.NavigateTo("/"))"
-                Style="padding-left: 25px; font-size: x-large; cursor:pointer;"
+                Style="font-size: xx-large; cursor:pointer;"
                 Text="MindNose" />
                 <NavMenu />
             </div>
 
             <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Wrap="FlexWrap.NoWrap">
-                <RadzenButton Icon="Light" Click="ToggleTheme" Style="width:40px; height:40px; border-radius:50%; padding:0; text-align:center;" />
-                <RadzenSidebarToggle Icon="Chat" Click="OpenSideDialog" class="rz-m-0" />
+                <RadzenButton Icon="Light" Variant="Variant.Flat" Click="ToggleTheme" Style="width:40px; height:40px; border-radius:50%; text-align:center;" />
             </RadzenStack>
         </RadzenStack>
     </RadzenHeader>
 
-    <RadzenBody Style="height: 98vh; display: flex; flex-direction: column;">
+    <RadzenBody Style="height: 98vh; display: flex; flex-direction: column;" @key="_componentKey">
         @Body
     </RadzenBody>
+
+    <RadzenButton Icon="Chat"
+    Variant="Variant.Filled"
+    Click="OpenSideDialog"
+    Style="position: fixed; bottom: 50px; right: 50px;
+                     width: 60px; height: 60px; border-radius: 50%;
+                     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                     z-index: 1000;" />
+
 </RadzenLayout>
 
 @code {
+    private string _componentKey = Guid.NewGuid().ToString();
     private bool _sidebarExpanded;
-    private string _currentTheme = "Material-Dark";
+    private string _currentTheme = "Software";
 
     protected override void OnInitialized()
     {
         ThemeService.SetTheme(_currentTheme);
     }
 
-    async Task OpenSideDialog()
+    private async Task OpenSideDialog()
     {
         var options = new SideDialogOptions
             {
@@ -56,11 +65,13 @@
                 Height = "100%"
             };
         await DialogService.OpenSideAsync<ChatDialog>("Chat", options: options);
+
+        _componentKey = Guid.NewGuid().ToString();
     }
     
     private void ToggleTheme()
     {
-        _currentTheme = (_currentTheme == "Software") ? "Material-Dark" : "Software";
+        _currentTheme = (_currentTheme == "Software") ? "Standard-Dark" : "Software";
         ThemeService.SetTheme(_currentTheme);
 
         StateHasChanged();
