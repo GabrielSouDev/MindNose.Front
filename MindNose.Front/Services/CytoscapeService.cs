@@ -63,4 +63,26 @@ public class CytoscapeService
         }
         return new();
     }
+    public List<ElementHeader> GetNotSelectedElementsHeader()
+    {
+        if (_cytoscape.Elements.Nodes.Count > _selectedElements.Count)
+        {
+            var notSelectedElements = _cytoscape.Elements.Nodes.Where(e => !_selectedElements.Contains(e.Data.Id)).ToList();
+            var notSelectedHeader = notSelectedElements
+                        .OrderBy(sh => sh.Data.Label == "Category")
+                        .Select(e =>
+                            new ElementHeader
+                            {
+                                Id = e.Data.Id,
+                                Title = e.Data.Extra!["Title"].ToString()!,
+                                Summary = e.Data.Extra["Summary"].ToString()!,
+                                Type = e.Data.Label!
+                            })
+                        .DistinctBy(e => e.Id)
+                        .ToList();
+
+            return notSelectedHeader;
+        }
+        return new();
+    }
 }

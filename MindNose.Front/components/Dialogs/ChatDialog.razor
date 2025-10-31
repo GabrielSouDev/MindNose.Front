@@ -5,12 +5,14 @@
 @inject MindNoseService MindNoseService
 @inject DialogService DialogService
 
-<div hidden="@_selectedElementsHidden">
+<div hidden="@_selectedElementsHidden" style="height: 100%; display: flex; flex-direction: column;">
 	<div style="display: flex; justify-content: flex-end; padding: 10px 0;">
-		<RadzenButton Icon="Close" Click="ToggleSelectedElements" Variant="Variant.Filled"  />
+		<RadzenButton Icon="Close" Click="ToggleSelectedElements" Variant="Variant.Filled" />
 	</div>
 
-	<SelectedElements />
+	<div style="flex: 1; overflow: hidden;">
+		<SelectedElements />
+	</div>
 </div>
 
 <RadzenStack Style="height: 100%;" Visible="_selectedElementsHidden">
@@ -84,7 +86,7 @@
 
 	protected override void OnParametersSet()
 	{
-		var models = OpenRouterService.GetModels();
+		var models = OpenRouterService.GetChatModels();
 		if (models?.Data != null && models.Data.Any())
 		{
 			_modelsChat = models.Data.Select(d => new ModelChat(d.Id, d.Name)).ToList();

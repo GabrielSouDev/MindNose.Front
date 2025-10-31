@@ -1,48 +1,90 @@
 @inject CytoscapeService CytoscapeService
 
-<RadzenStack Style=@($"height: {Style}%; width: 100%; ")>
-	<RadzenCard Style="height: 100%; display: flex; flex-direction: column;">
-		@if (_selectedElementsHeader.Count == 0)
-		{
-			<h6>Não há elementos Selecionados!</h6>
-		}else
-		{
-			<h6 style="text-align:center;">Elementos Selecionados</h6>
-		}
 
-		@foreach (var type in new[] { "Category", "Term" })
-		{
-			var element = _selectedElementsHeader.FirstOrDefault(e => e.Type == type);
-			if (!string.IsNullOrEmpty(element?.Title))
-			{
-				<p>@(type == "Category" ? "Categorias:" : "Termos:")</p>
-			}
+<RadzenStack Style="height: 100%; width: 100%; display: flex; flex-direction: column;">
+    <RadzenCard Style="flex: 1; overflow-y: auto;">
 
-			foreach (var item in _selectedElementsHeader.Where(e => e.Type == type))
-			{
-				<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px dashed #000; margin-bottom: 5px;">
-					<span>@item.Title</span>
-					<RadzenButton Text="Remover" Click="@(() => RemoveSelectedElement(item.Id))" />
-				</div>
-			}
-			<br/>
-		}
-	</RadzenCard>
+        @if (_selectedElementsHeader.Count == 0)
+        {
+            <h6>Não há elementos Selecionados!</h6>
+        }
+        else
+        {
+            <h6 style="text-align:center;">Elementos Selecionados</h6>
+        }
+
+        @foreach (var type in new[] { "Category", "Term" })
+        {
+            var element = _selectedElementsHeader.FirstOrDefault(e => e.Type == type);
+            if (!string.IsNullOrEmpty(element?.Title))
+            {
+                <p>@(type == "Category" ? "Categorias:" : "Termos:")</p>
+            }
+
+            foreach (var item in _selectedElementsHeader.Where(e => e.Type == type))
+            {
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px dashed #000; margin-bottom: 5px;">
+                    <span>@item.Title</span>
+                    <RadzenButton Text="Remover" Click="@(() => RemoveSelectedElement(item))" />
+                </div>
+            }
+            <br />
+        }
+    </RadzenCard>
+
+    <RadzenCard Style="flex: 1; overflow-y: auto;">
+        @if (_notSelectedElementsHeader.Count == 0)
+        {
+            <h6>Não há elementos para selecionar!</h6>
+        }
+        else
+        {
+            <h6 style="text-align:center;">Selecionar Elementos</h6>
+        }
+
+        @foreach (var type in new[] { "Category", "Term" })
+        {
+            var element = _notSelectedElementsHeader.FirstOrDefault(e => e.Type == type);
+            if (!string.IsNullOrEmpty(element?.Title))
+            {
+                <p>@(type == "Category" ? "Categorias:" : "Termos:")</p>
+            }
+
+            foreach (var item in _notSelectedElementsHeader.Where(e => e.Type == type))
+            {
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px dashed #000; margin-bottom: 5px;">
+                    <span>@item.Title</span>
+                    <RadzenButton Text="Adicionar" Click="@(() => AddSelectedElement(item))" />
+                </div>
+            }
+            <br />
+        }
+    </RadzenCard>
 </RadzenStack>
 
 @code{
-	[Parameter]public string Style { get; set; } = string.Empty;
 	private List<ElementHeader> _selectedElementsHeader = new();
+	private List<ElementHeader> _notSelectedElementsHeader = new();
 
 	protected override void OnInitialized()
 	{
 		_selectedElementsHeader = CytoscapeService.GetSelectedElementsHeader();
+		_notSelectedElementsHeader = CytoscapeService.GetNotSelectedElementsHeader();
 	}
-	private void RemoveSelectedElement(string elementId)
+	private void RemoveSelectedElement(ElementHeader element)
 	{
-		CytoscapeService.RemoveSelectedElement(elementId);
-		var selectedElement = _selectedElementsHeader.First(e => e.Id == elementId);
-		_selectedElementsHeader.Remove(selectedElement);
+		CytoscapeService.RemoveSelectedElement(element.Id);
+
+		_selectedElementsHeader.Remove(element);
+		_notSelectedElementsHeader.Add(element);
+		StateHasChanged();
+	}
+	private void AddSelectedElement(ElementHeader element)
+	{
+		CytoscapeService.AddSelectedElement(element.Id);
+
+		_selectedElementsHeader.Add(element);
+		_notSelectedElementsHeader.Remove(element);
 		StateHasChanged();
 	}
 }
