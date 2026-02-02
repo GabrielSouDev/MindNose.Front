@@ -14,43 +14,55 @@
 </HeadContent>
 
 <RadzenLayout Style="grid-template-columns: 1fr auto; grid-template-areas: 'rz-header rz-header' 'rz-body rz-sidebar'">
-    <RadzenHeader Style="height: 2vh; padding: 10px 25px; margin-bottom: 5px;">
-        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center" Gap="1rem">
-            <div style="display:flex; flex-direction: row; align-content:center; align-items:center; text-align:center; gap:50px;">
-                <RadzenLabel @onclick="@(() => NavigationManager.NavigateTo("/"))"
-                Style="font-size: xx-large; cursor:pointer;"
-                Text="MindNose" />
-                <NavMenu />
-            </div>
+    @if (!showOverlay) //tirar negativação e colocara popup
+    {
 
-            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Wrap="FlexWrap.NoWrap">
-                <RadzenButton Icon="Light" Variant="Variant.Flat" Click="ToggleTheme" Style="width:40px; height:40px; border-radius:50%; text-align:center;" />
+    }else
+    {
+        <RadzenHeader Style="height: 2vh; padding: 10px 25px; margin-bottom: 5px;">
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center" Gap="1rem">
+                <div style="display:flex; flex-direction: row; align-content:center; align-items:center; text-align:center; gap:50px;">
+                    <RadzenLabel @onclick="@(() => NavigationManager.NavigateTo("/"))"
+                    Style="font-size: xx-large; cursor:pointer;"
+                    Text="MindNose" />
+                    <NavMenu />
+                </div>
+
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Wrap="FlexWrap.NoWrap">
+                    <RadzenButton Icon="Light" Variant="Variant.Flat" Click="ToggleTheme" Style="width:40px; height:40px; border-radius:50%; text-align:center;" />
+                </RadzenStack>
             </RadzenStack>
-        </RadzenStack>
-    </RadzenHeader>
+        </RadzenHeader>
 
-    <RadzenBody Style="height: 98vh; display: flex; flex-direction: column;" @key="_componentKey">
-        @Body
-    </RadzenBody>
+        <RadzenBody Style="height: 98vh; display: flex; flex-direction: column;" @key="_componentKey">
+            @Body
+        </RadzenBody>
 
-    <RadzenButton Icon="Chat"
-    Variant="Variant.Filled"
-    Click="OpenSideDialog"
-    Style="position: fixed; bottom: 50px; right: 50px;
-                     width: 60px; height: 60px; border-radius: 50%;
-                     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-                     z-index: 1000;" />
-
+        <RadzenButton Icon="Chat"
+        Variant="Variant.Filled"
+        Click="OpenSideDialog"
+        Style="position: fixed; bottom: 50px; right: 50px;
+                         width: 60px; height: 60px; border-radius: 50%;
+                         box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                         z-index: 1000;" />
+    }
 </RadzenLayout>
 
 @code {
     private string _componentKey = Guid.NewGuid().ToString();
     private bool _sidebarExpanded;
     private string _currentTheme = "Software";
+    private bool showOverlay = true;
 
     protected override void OnInitialized()
     {
         ThemeService.SetTheme(_currentTheme);
+    }
+
+    private void HideOverlay()
+    {
+        showOverlay = false;
+        StateHasChanged();    
     }
 
     private async Task OpenSideDialog()

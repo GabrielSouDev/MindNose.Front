@@ -1,7 +1,8 @@
-﻿@page "/Tabela-de-modelos"
+﻿@inject NavigationManager NavigationManager
+@page "/Tabela-de-modelos"
 
-@inject OpenRouterService OpenRouterService
+@attribute [Authorize(Roles = Role.Admin)]
 
-<PageTitle>Tabela de Modelos - MindNose</PageTitle>
+<PageTitle>MindNose - Tabela de Modelos</PageTitle>
 
 <ModelTable />

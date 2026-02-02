@@ -1,6 +1,10 @@
-﻿@inject CytoscapeService CytoscapeService
+﻿@inject NavigationManager NavigationManager
+@inject CytoscapeService CytoscapeService
+
+@attribute [Authorize(Policy = Policy.UserOrAdmin)]
 
 @page "/SimilarityGraph"
+@using MindNose.Front.Models.Response.CytoscapeDTO
 <PageTitle>Grafico de Similaridade - MindNose</PageTitle>
 
 <RadzenCard>
@@ -8,16 +12,14 @@
         <RadzenRow style="min-height: fit-content;">
             <RadzenColumn Size="12" SizeLG="12" style="min-height: fit-content;">
                 <h2>Grafico de Similaridade</h2>
-			    @foreach (var chartElements in _chartTables)
-			    {
+                @foreach (var chartElements in _chartTables)
+                {
                     <SimilarityGraph ChartTable="chartElements" />
-			    }
-		    </RadzenColumn>
-	    </RadzenRow>
+                }
+            </RadzenColumn>
+        </RadzenRow>
     </RadzenStack>
 </RadzenCard>
-
-
 
 @code{
     private ElementsDTO _elements = new();

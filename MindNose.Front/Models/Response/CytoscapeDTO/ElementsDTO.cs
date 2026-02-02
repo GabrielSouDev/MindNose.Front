@@ -1,4 +1,4 @@
-﻿namespace MindNose.Front.Models.Cytoscape;
+﻿namespace MindNose.Front.Models.Response.CytoscapeDTO;
 public class ElementsDTO
 {
     public List<NodeDTO> Nodes { get; set; } = new List<NodeDTO>();

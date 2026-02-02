@@ -1,10 +1,11 @@
-﻿using MindNose.Front.Models.Cytoscape;
-using MindNose.Front.Models.Enum;
-using MindNose.Front.Models.IAChat;
+﻿using MindNose.Front.Models.Enum;
+using MindNose.Front.Models.Chat;
+using MindNose.Front.Models.Response;
 using Radzen.Blazor.Markdown;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
+using MindNose.Front.Models.Response.CytoscapeDTO;
 
 namespace MindNose.Front.Services;
 

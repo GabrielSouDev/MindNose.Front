@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace MindNose.Front.Models.LLMModels;
+namespace MindNose.Front.Models.Response.LLMModels;
 public class Pricing
 {
     [JsonPropertyName("prompt")]

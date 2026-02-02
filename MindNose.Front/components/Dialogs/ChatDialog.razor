@@ -1,8 +1,6 @@
-@using ChatMessage = Models.IAChat.ChatMessage
-
 @inject CytoscapeService CytoscapeService
 @inject OpenRouterService OpenRouterService
-@inject MindNoseService MindNoseService
+@inject MindNoseApiService MindNoseService
 @inject DialogService DialogService
 
 <div hidden="@_selectedElementsHidden" style="height: 100%; display: flex; flex-direction: column;">
@@ -20,7 +18,7 @@
 		<div style="flex: 1; overflow-y: auto; padding: 10px; display:flex; flex-direction:column;">
 			@foreach (var message in _chatMessage.Messages)
 			{
-				@if (message.Origin == IAChatOrigin.System)
+				@if (message.Origin == ChatOrigin.System)
 				{
 					<div style="width: 100%; display: flex; justify-content: flex-start;">
 						<div style="background-color: darkgrey; color: white; 
@@ -49,10 +47,10 @@
 			<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Style="width:100%;">
 				<RadzenLabel Style="width:fit-content; white-space: nowrap;" Text="Select Model: " />
 				<RadzenDropDown @bind-Value="@_selectedModelId"
-				Data="@_modelsChat"
-				TextProperty="@nameof(ModelChat.Name)"
-				ValueProperty="@nameof(ModelChat.Id)"
-				Style="width: 100%;" />
+					Data="@_modelsChat"
+					TextProperty="@nameof(ChatModel.Name)"
+					ValueProperty="@nameof(ChatModel.Id)"
+					Style="width: 100%;" />
 			</RadzenStack>
 			<div style="display: flex; justify-content: flex-end; padding: 10px 0;">
 				<RadzenButton Text="Elementos Selecionados" Click="ToggleSelectedElements" />
@@ -73,13 +71,13 @@
 
 @code{
 	private bool _selectedElementsHidden = true;
-	private List<ModelChat> _modelsChat = new();
-	private ChatMessage _chatMessage = new();
+	private List<ChatModel> _modelsChat = new();
+	private ConversationGuide _chatMessage = new();
 	private string _selectedModelId = string.Empty;
 	private Message _textBox = new()
 	{
 		Text = string.Empty,
-		Origin = IAChatOrigin.User
+		Origin = ChatOrigin.User
 	};
 
 	private bool _preventDefaultEnter = false;
@@ -89,7 +87,7 @@
 		var models = OpenRouterService.GetChatModels();
 		if (models?.Data != null && models.Data.Any())
 		{
-			_modelsChat = models.Data.Select(m => new ModelChat(m.Id, m.Name)).OrderBy(m => m.Name).ToList();
+			_modelsChat = models.Data.Select(m => new ChatModel(m.Id, m.Name)).OrderBy(m => m.Name).ToList();
 
 			var model = _modelsChat.FirstOrDefault(m => m.Id == "mistralai/mistral-small-3.2-24b-instruct");
 			if (model is not null)
@@ -113,7 +111,7 @@
 	private async Task SubmitAsync()
 	{
 		if(!string.IsNullOrEmpty(_textBox.Text))
-			_chatMessage.Messages.Add(new Message { Text = _textBox.Text, Origin = IAChatOrigin.User });
+			_chatMessage.Messages.Add(new Message { Text = _textBox.Text, Origin = ChatOrigin.User });
 
 		var selectedElementsHeader = CytoscapeService.GetSelectedElementsHeader();
 
@@ -126,14 +124,14 @@
 
 		_textBox.Text = string.Empty;
 
-		_chatMessage.Messages.Add(new Message { Text = "Pensando..", Origin = IAChatOrigin.System });
+		_chatMessage.Messages.Add(new Message { Text = "Pensando..", Origin = ChatOrigin.System });
 
 		var response = await MindNoseService.SendChatAsync(request);
 
 		_chatMessage.Messages.RemoveAt(_chatMessage.Messages.Count - 1);
 
 		if (!string.IsNullOrEmpty(response))
-			_chatMessage.Messages.Add(new Message { Text = Markdown.ToHtml(response), Origin = IAChatOrigin.System });
+			_chatMessage.Messages.Add(new Message { Text = Markdown.ToHtml(response), Origin = ChatOrigin.System });
 	}
 
 	private async Task HandleKeyUpAsync(KeyboardEventArgs args)

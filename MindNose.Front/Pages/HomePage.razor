@@ -1,4 +1,7 @@
-﻿@page "/"
+﻿@inject NavigationManager NavigationManager
+@page "/"
+
+@attribute [Authorize(Policy = Policy.UserOrAdmin)]
 
 <PageTitle>MindNose</PageTitle>
 

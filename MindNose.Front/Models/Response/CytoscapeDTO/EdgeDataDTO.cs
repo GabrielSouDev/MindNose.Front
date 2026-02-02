@@ -1,4 +1,4 @@
-﻿namespace MindNose.Front.Models.Cytoscape;
+﻿namespace MindNose.Front.Models.Response.CytoscapeDTO;
 public class EdgeDataDTO
 {
     public string Id { get; set; } = string.Empty;

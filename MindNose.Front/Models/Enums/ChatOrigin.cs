@@ -1,5 +1,5 @@
 ﻿namespace MindNose.Front.Models.Enums;
-public enum IAChatOrigin
+public enum ChatOrigin
 {
     System,
     User

@@ -205,37 +205,64 @@ a, .btn-link {
     white-space: pre-wrap;
 }
 
-    /* Títulos com menos margem */
-    .chat h1, .chat h2, .chat h3 {
-        margin-top: 0;
-        margin-bottom: 0;
-        font-weight: 600;
-        font-size: 1.4em;
-        line-height: 1.2;
-    }
+/* Títulos com menos margem */
+.chat h1, .chat h2, .chat h3 {
+    margin-top: 0;
+    margin-bottom: 0;
+    font-weight: 600;
+    font-size: 1.4em;
+    line-height: 1.2;
+}
 
-    /* Parágrafos mais compactos */
-    .chat p {
-        margin: 0;
-    }
+/* Parágrafos mais compactos */
+.chat p {
+    margin: 0;
+}
 
-    /* Listas mais enxutas */
-    .chat ul, .chat ol {
-        margin: 0.3em 0 0.3em 1.2em;
-        padding: 0;
-    }
+/* Listas mais enxutas */
+.chat ul, .chat ol {
+    margin: 0.3em 0 0.3em 1.2em;
+    padding: 0;
+}
 
-    /* Negrito e itálico */
-    .chat strong {
-        font-weight: bold;
-    }
+/* Negrito e itálico */
+.chat strong {
+    font-weight: bold;
+}
 
-    .chat em {
-        font-style: italic;
-    }
+.chat em {
+    font-style: italic;
+}
 
-    /* Links */
-    .chat a {
-        color: #4a00e0;
-        text-decoration: underline;
-    }
+/* Links */
+.chat a {
+    color: #4a00e0;
+    text-decoration: underline;
+}
+
+/* ===================================== */
+/* ============== Overlay ============== */
+/* ===================================== */
+
+.full-screen-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: 10000;
+    cursor: pointer;
+}
+
+.full-screen-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: fill;
+    background-position: center;
+    z-index: 10000;
+    cursor: pointer;
+}

@@ -1,5 +1,5 @@
 ﻿using System.Globalization;
-using MindNose.Front.Models.LLMModels;
+using MindNose.Front.Models.Response.LLMModels;
 
 namespace MindNose.Front.Services;
 

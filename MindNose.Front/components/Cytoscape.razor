@@ -1,6 +1,9 @@
-﻿@inject IJSRuntime JS
+﻿@using MindNose.Front.Models
+@using MindNose.Front.Models.Response
+@using MindNose.Front.Models.Response.CytoscapeDTO
+@inject IJSRuntime JS
 @inject CytoscapeService CytoscapeService
-@inject MindNoseService MindNoseService
+@inject MindNoseApiService MindNoseService
 
 <RadzenStack Style="height: 100%; margin: 10px;">
 	<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Wrap="FlexWrap.NoWrap">

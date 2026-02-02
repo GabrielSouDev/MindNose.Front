@@ -1,9 +1,9 @@
-﻿namespace MindNose.Front.Models.IAChat;
+﻿namespace MindNose.Front.Models.Chat;
 
-public class ModelChat
+public class ChatModel
 {
-    public ModelChat() { }
-    public ModelChat(string id, string name)
+    public ChatModel() { }
+    public ChatModel(string id, string name)
     {
         Id = id;
         Name = name;

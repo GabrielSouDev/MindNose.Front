@@ -1,8 +1,8 @@
 ﻿using MindNose.Front.Models.Enums;
 
-namespace MindNose.Front.Models.IAChat;
+namespace MindNose.Front.Models.Chat;
 public class Message
 {
     public string? Text { get; set; } = string.Empty;
-    public IAChatOrigin Origin { get; set; } = IAChatOrigin.System;
+    public ChatOrigin Origin { get; set; } = ChatOrigin.System;
 }

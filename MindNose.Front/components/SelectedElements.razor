@@ -1,16 +1,15 @@
 @inject CytoscapeService CytoscapeService
 
-
 <RadzenStack Style="height: 100%; width: 100%; display: flex; flex-direction: column;">
     <RadzenCard Style="flex: 1; overflow-y: auto;">
 
         @if (_selectedElementsHeader.Count == 0)
         {
-            <h6>Não há elementos Selecionados!</h6>
+            <h6 style="text-align:center;">Não há elementos Selecionados!</h6>
         }
         else
         {
-            <h6 style="text-align:center;">Elementos Selecionados</h6>
+            <h6 style="text-align:center;">Elementos Selecionados - @_selectedElementsHeader.Count Selecionados</h6>
         }
 
         @foreach (var type in new[] { "Category", "Term" })
@@ -35,11 +34,11 @@
     <RadzenCard Style="flex: 1; overflow-y: auto;">
         @if (_notSelectedElementsHeader.Count == 0)
         {
-            <h6>Não há elementos para selecionar!</h6>
+            <h6 style="text-align:center;">Não há elementos para selecionar!</h6>
         }
         else
         {
-            <h6 style="text-align:center;">Selecionar Elementos</h6>
+            <h6 style="text-align:center;">Selecionar Elementos - @_notSelectedElementsHeader.Count Não Selecionados</h6>
         }
 
         @foreach (var type in new[] { "Category", "Term" })

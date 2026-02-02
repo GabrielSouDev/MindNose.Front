@@ -1,4 +1,4 @@
-﻿namespace MindNose.Front.Models.IAChat;
+﻿namespace MindNose.Front.Models.Chat;
 
 public class ElementHeader
 {
