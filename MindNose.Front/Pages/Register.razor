@@ -1,0 +1,70 @@
+﻿@page "/Register"
+@inject MindNoseApiService MindNoseApi
+@inject NavigationManager NavigationManager
+
+<RadzenStack Style="height: 100vh;" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center">
+    <RadzenCard Style="width: 400px; padding: 2rem;">
+        <EditForm Model="_registerRequest" OnValidSubmit="HandleRegisterAsync">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <RadzenStack Gap="20px">
+                <!-- Título -->
+                <RadzenText TextStyle="TextStyle.H5" class="text-center">
+                    Registrar
+                </RadzenText>
+
+                <!-- Username -->
+                <RadzenFormField Text="Usuário">
+                    <RadzenTextBox Style="width: 100%;" @bind-Value="_registerRequest.UserName" />
+                    <ValidationMessage For="@(() => _registerRequest.UserName)" />
+                </RadzenFormField>
+
+                <!-- Email -->
+                <RadzenFormField Text="E-mail">
+                    <RadzenTextBox Style="width: 100%;" @bind-Value="_registerRequest.Email" />
+                    <ValidationMessage For="@(() => _registerRequest.Email)" />
+                </RadzenFormField>
+
+                <!-- Senha -->
+                <RadzenFormField Text="Senha">
+                    <RadzenPassword Style="width: 100%;" @bind-Value="_registerRequest.Password" />
+                    <ValidationMessage For="@(() => _registerRequest.Password)" />
+                </RadzenFormField>
+
+                <!-- Botão Registrar -->
+                <RadzenButton Text="Registrar"
+                              Style="width: 100%;"
+                              ButtonStyle="ButtonStyle.Primary"
+                              ButtonType="ButtonType.Submit" />
+
+                <!-- Voltar para Login -->
+                <RadzenButton Text="Voltar para Login"
+                              Style="width: 100%;"
+                              ButtonStyle="ButtonStyle.Light"
+                              Click="@(() => NavigationManager.NavigateTo("/Login"))" />
+            </RadzenStack>
+        </EditForm>
+    </RadzenCard>
+</RadzenStack>
+
+@code {
+    private RegisterRequest _registerRequest = new();
+    private string _registerResponse = string.Empty;
+
+    private async Task HandleRegisterAsync()
+    {
+        _registerResponse = string.Empty;
+
+        var success = await MindNoseApi.Register(_registerRequest);
+
+        if (success)
+        {
+            NavigationManager.NavigateTo("/Login");
+        }
+        else
+        {
+            _registerResponse = "Falha ao registrar. Verifique os dados e tente novamente.";
+        }
+    }
+}

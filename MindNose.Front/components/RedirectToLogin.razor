@@ -1,0 +1,20 @@
+﻿@inject LocalStorageAuthProvider AuthProvider
+@inject NavigationManager NavigationManager
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var authState =await AuthProvider.GetAuthenticationStateAsync();
+
+        var user = authState.User;
+
+        if (!user.Identity?.IsAuthenticated ?? true)
+        {
+            NavigationManager.NavigateTo("/login");
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/acesso-negado");
+        }
+    }
+}
