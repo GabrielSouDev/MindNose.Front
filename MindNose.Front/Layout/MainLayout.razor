@@ -2,6 +2,7 @@
 @inject NavigationManager NavigationManager
 @inject CytoscapeService CytoscapeService
 @inject OpenRouterService OpenRouterService
+@inject LocalStorageAuthProvider AuthProvider
 @inject ThemeService ThemeService
 
 @inherits LayoutComponentBase
@@ -19,39 +20,63 @@
 
     }else
     {
-        <RadzenHeader Style="height: 2vh; padding: 10px 25px; margin-bottom: 5px;">
-            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center" Gap="1rem">
-                <div style="display:flex; flex-direction: row; align-content:center; align-items:center; text-align:center; gap:50px;">
-                    <RadzenLabel @onclick="@(() => NavigationManager.NavigateTo("/"))"
-                    Style="font-size: xx-large; cursor:pointer;"
-                    Text="MindNose" />
-                    <NavMenu />
-                </div>
+        <RadzenHeader Style="height: 60px; padding: 10px 25px; margin-bottom: 5px;">
+            <AuthorizeView>
+                <Authorized>
+                    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center" Gap="1rem">
+                        <div style="display:flex; flex-direction: row; align-content:center; align-items:center; text-align:center; gap:50px;">
+                            <RadzenLabel @onclick="@(() => NavigationManager.NavigateTo("/"))"
+                                         Style="font-size: 42px; font-weight: 400; cursor:pointer;"
+                                         Text="MindNose" />
 
-                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Wrap="FlexWrap.NoWrap">
-                    <RadzenButton Icon="Light" Variant="Variant.Flat" Click="ToggleTheme" Style="width:40px; height:40px; border-radius:50%; text-align:center;" />
-                </RadzenStack>
-            </RadzenStack>
+                            <NavMenu />
+                        </div>
+
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Wrap="FlexWrap.NoWrap">
+                            <RadzenButton Icon="Light" Variant="Variant.Flat" Click="ToggleTheme"
+                                          Style="width:40px; height:40px; border-radius:50%; text-align:center;" />
+
+                            <RadzenButton Text="Sair" Icon="logout" Click="LogOutAsync"
+                                          Style="font-weight: bold; padding: 10px 25px; border-radius: 25px; border: none;
+                                             box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.2s, box-shadow 0.2s;" />
+                        </RadzenStack>
+                    </RadzenStack>
+                </Authorized>
+
+                <NotAuthorized>
+                    <div style="position: relative; width: 100%; height: 100%; display: flex; align-items: center;">
+                        <RadzenLabel @onclick="@(() => NavigationManager.NavigateTo("/"))"
+                                     Style="font-size: 48px; font-weight: 400; cursor:pointer; position: absolute; left: 50%; transform: translateX(-50%); text-align:center;"
+                                     Text="MindNose" />
+
+                        <RadzenButton Icon="Light" Variant="Variant.Flat" Click="ToggleTheme"
+                                      Style="margin-left: auto; width:40px; height:40px; border-radius:50%; text-align:center;" />
+                    </div>
+                </NotAuthorized>
+            </AuthorizeView>
         </RadzenHeader>
 
         <RadzenBody Style="height: 98vh; display: flex; flex-direction: column;" @key="_componentKey">
             @Body
         </RadzenBody>
-
-        <RadzenButton Icon="Chat"
-        Variant="Variant.Filled"
-        Click="OpenSideDialog"
-        Style="position: fixed; bottom: 50px; right: 50px;
-                         width: 60px; height: 60px; border-radius: 50%;
-                         box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-                         z-index: 1000;" />
+        <AuthorizeView>
+            <Authorized>
+                <RadzenButton Icon="Chat"
+                              Variant="Variant.Filled"
+                              Click="OpenSideDialog"
+                              Style="position: fixed; bottom: 50px; right: 50px;
+                             width: 60px; height: 60px; border-radius: 50%;
+                             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                             z-index: 1000;" />
+            </Authorized>
+        </AuthorizeView>
     }
 </RadzenLayout>
 
 @code {
     private string _componentKey = Guid.NewGuid().ToString();
     private bool _sidebarExpanded;
-    private string _currentTheme = "Software";
+    private string _currentTheme = "Standard-Dark";
     private bool showOverlay = true;
 
     protected override void OnInitialized()
@@ -80,12 +105,17 @@
 
         _componentKey = Guid.NewGuid().ToString();
     }
-    
+
     private void ToggleTheme()
     {
         _currentTheme = (_currentTheme == "Software") ? "Standard-Dark" : "Software";
         ThemeService.SetTheme(_currentTheme);
 
         StateHasChanged();
+    }
+    private async Task LogOutAsync()
+    {
+        await AuthProvider.MarkUserAsLoggedOutAsync();
+        NavigationManager.NavigateTo("/login");
     }
 }

@@ -10,7 +10,7 @@
 
         if (!user.Identity?.IsAuthenticated ?? true)
         {
-            NavigationManager.NavigateTo("/login");
+            NavigationManager.NavigateTo("/login", true);
         }
         else
         {

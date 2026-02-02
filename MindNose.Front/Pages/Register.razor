@@ -1,4 +1,4 @@
-﻿@page "/Register"
+﻿@page "/registrar"
 @inject MindNoseApiService MindNoseApi
 @inject NavigationManager NavigationManager
 
@@ -42,7 +42,7 @@
                 <RadzenButton Text="Voltar para Login"
                               Style="width: 100%;"
                               ButtonStyle="ButtonStyle.Light"
-                              Click="@(() => NavigationManager.NavigateTo("/Login"))" />
+                              Click="@(() => NavigationManager.NavigateTo("/login"))" />
             </RadzenStack>
         </EditForm>
     </RadzenCard>

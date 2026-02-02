@@ -266,3 +266,22 @@ a, .btn-link {
     z-index: 10000;
     cursor: pointer;
 }
+
+/*Logout button*/
+
+.btn-logout {
+    background-color: #e74c3c;
+    color: white;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: all 0.2s ease-in-out;
+}
+
+    .btn-logout:hover {
+        background-color: #c0392b;
+        cursor: pointer;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+    }

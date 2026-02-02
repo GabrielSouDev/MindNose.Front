@@ -1,6 +1,12 @@
 ﻿<RadzenMenu Style="flex-direction: row;">
-    <RadzenMenuItem Text="Inicio" Icon="home" Path="/" Match="NavLinkMatch.All" />
-    <RadzenMenuItem Text="Grafico de Similaridade" Icon="insert_chart" Path="/SimilarityGraph" />
-    <RadzenMenuItem Text="Tabela de Modelos" Icon="table_chart" Path="/Tabela-de-modelos" />
-    <RadzenMenuItem Text="Sobre" Icon="help" Path="/Sobre" />
+    <RadzenMenuItem Text="Inicio" Path="/" Match="NavLinkMatch.All" />
+    <RadzenMenuItem Text="Grafico de Similaridade" Path="/grafico-de-similaridade" />
+
+    <AuthorizeView Roles="@Role.Admin">
+        <Authorized>
+            <RadzenMenuItem Text="Tabela de Modelos" Path="/tabela-de-modelos" />
+        </Authorized>
+    </AuthorizeView>
+
+    <RadzenMenuItem Text="Sobre" Path="/sobre" />
 </RadzenMenu>
