@@ -1,8 +1,39 @@
-﻿@page "/sobre"
+﻿@inject ThemeService ThemeService
+
+@page "/sobre"
 
 <PageTitle>Sobre - MindNose</PageTitle>
-<RadzenCard>
-	<h1>MindNose</h1>
 
-	<p>Explicação do projeto!</p>
+<RadzenCard Style="padding:40px 30px; max-width:900px; margin:50px auto; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.1);">
+    <h1 style="font-size:2.8rem; margin-bottom:30px; text-align:center;">MindNose</h1>
+
+    <div style="font-size:1.15rem; line-height:1.9; text-align:justify; text-indent: 2em; margin-bottom:20px;">
+        O <strong>MindNose</strong> é um sistema inteligente de exploração de conhecimento que transforma a forma como você pesquisa e aprende.
+        Combinando um <em>grafo de termos</em> dinâmico e um <em>chat contextualizado</em>, ele permite que você descubra conexões inesperadas entre conceitos,
+        enriqueça suas perguntas com informações relevantes e receba respostas precisas adaptadas ao seu estilo e contexto.
+    </div>
+
+    <div style="font-size:1.15rem; line-height:1.9; text-align:justify; text-indent: 2em; margin-bottom:20px;">
+        Pesquise termos, explore relações entre ideias, selecione elementos-chave para aprofundar seu entendimento e construa insights de forma rápida e intuitiva.
+        O MindNose é ideal tanto para estudantes, pesquisadores e profissionais que buscam eficiência na aquisição de conhecimento,
+        quanto para qualquer pessoa curiosa que deseja compreender melhor o mundo ao seu redor.
+    </div>
+
+    <div style="font-size:1.15rem; line-height:1.9; text-align:justify; text-align:center; margin-bottom:30px;">
+        Criado por
+        <a href="https://www.linkedin.com/in/gabriel-souza21/" target="_blank">Gabriel Souza - Linkedin</a> •
+        Código disponível em
+        <a href="https://github.com/GabrielSouDev" target="_blank">GabrielSouDev - GitHub</a>
+    </div>
+
+    <div style="text-align:center;">
+        <RadzenButton Text="🎓 Ver Tutorial" Click="@AbrirTutorial" Style="padding:12px 30px; font-weight:600;" />
+    </div>
 </RadzenCard>
+
+@code {
+    private void AbrirTutorial(MouseEventArgs args)
+    {
+        throw new NotImplementedException();
+    }
+}
