@@ -46,7 +46,9 @@ public class MindNoseApiService
         var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
         return result;
     }
-
+    
+    public async Task<HttpResponseMessage> AddCategoryAsync(string newCategory) =>
+        await _httpClient.PostAsJsonAsync("api/Utils/AddCategory", newCategory);
 
     public async Task<ElementsDTO> CreateOrGetLink(object request)
     {

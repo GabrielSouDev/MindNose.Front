@@ -1,0 +1,55 @@
+﻿@inject MindNoseApiService MindNoseApi
+
+@page "/painel-administrativo"
+
+@attribute [Authorize(Roles = Role.Admin)]
+
+<PageTitle>MindNose - Painel Administrativo</PageTitle>
+
+<RadzenStack Style="padding:40px 30px; max-width:900px; margin:50px auto; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,0.1);">
+    <RadzenCard>
+        <RadzenText TextStyle="TextStyle.H5" TextAlign="TextAlign.Center">Adicionar Categoria</RadzenText>
+
+        <RadzenFormField Text="Categoria">
+            <RadzenTextBox Placeholder="Digite a categoria"
+                           @bind-Value="_newCategory" />
+        </RadzenFormField>
+
+        <RadzenButton Text="Salvar"
+                      Style="margin-top: 10px"
+                      ButtonStyle="ButtonStyle.Primary"
+                      Click="@AddCategoryAsync"
+                      Disabled="@string.IsNullOrWhiteSpace(_newCategory)" />
+
+        @if (!string.IsNullOrEmpty(_message))
+        {
+            <RadzenAlert Style="margin-top: 10px">
+                @_message
+            </RadzenAlert>
+        }
+    </RadzenCard>
+</RadzenStack>
+
+@code {
+    private string _newCategory = string.Empty;
+    private string _message = string.Empty;
+
+    private async Task AddCategoryAsync()
+    {
+        var response = await MindNoseApi.AddCategoryAsync(_newCategory);
+
+        switch (response.StatusCode)
+        {
+            case HttpStatusCode.NoContent:
+                _message = $"Categoria \"{_newCategory}\" adicionada com sucesso!";
+                break;
+            case HttpStatusCode.Conflict:
+                _message = $"Categoria \"{_newCategory}\" já existe!";
+                break;
+            default:
+                _message = $"Erro ao realizar requisição: {response.Content.ReadAsStringAsync()}";
+                break;
+        }
+        _newCategory = string.Empty;
+    }
+}
