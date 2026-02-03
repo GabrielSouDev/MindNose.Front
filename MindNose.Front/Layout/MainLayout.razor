@@ -4,6 +4,7 @@
 @inject OpenRouterService OpenRouterService
 @inject LocalStorageAuthProvider AuthProvider
 @inject ThemeService ThemeService
+@inject IJSRuntime JS
 
 @inherits LayoutComponentBase
 
@@ -35,7 +36,7 @@
 
                         <!-- Direita -->
                         <div style="display:flex; align-items:center; gap:12px;">
-                            <RadzenButton Icon="Light" Variant="Variant.Flat" Click="ToggleTheme"
+                            <RadzenButton Icon="Light" Variant="Variant.Flat" Click="ToggleThemeAsync"
                                           Style="width:40px; height:40px; border-radius:50%; text-align:center;" />
                             <RadzenButton Text="Sair" Icon="logout" Click="LogOutAsync"
                                           Style="font-weight: bold; padding: 10px 25px; border-radius: 25px; border: none;
@@ -51,7 +52,7 @@
                                      Style="font-size: 48px; font-weight: 400; cursor:pointer;"
                                      Text="MindNose" />
 
-                        <RadzenButton Icon="Light" Variant="Variant.Flat" Click="ToggleTheme"
+                        <RadzenButton Icon="Light" Variant="Variant.Flat" Click="ToggleThemeAsync"
                                       Style="position:absolute; right:25px; width:40px; height:40px; border-radius:50%; text-align:center;" />
                     </div>
                 </NotAuthorized>
@@ -83,9 +84,11 @@
     private string _currentTheme = "Standard-Dark";
     private bool showOverlay = true;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         ThemeService.SetTheme(_currentTheme);
+        await JS.InvokeVoidAsync("setTheme", _currentTheme);
+        StateHasChanged();
     }
 
     private void HideOverlay()
@@ -110,10 +113,11 @@
         _componentKey = Guid.NewGuid().ToString();
     }
 
-    private void ToggleTheme()
+    private async Task ToggleThemeAsync()
     {
         _currentTheme = (_currentTheme == "Software") ? "Standard-Dark" : "Software";
         ThemeService.SetTheme(_currentTheme);
+        await JS.InvokeVoidAsync("setTheme", _currentTheme);
 
         StateHasChanged();
     }
