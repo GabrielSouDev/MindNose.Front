@@ -32,6 +32,7 @@ builder.Services.AddHttpClient("ApiClient", client =>
 .AddHttpMessageHandler<JwtAuthorizationMessageHandler>();
 
 builder.Services.AddScoped<ThemeService>();
+builder.Services.AddScoped<LocalStorageTheme>();
 builder.Services.AddScoped<MindNoseApiService>();
 builder.Services.AddSingleton<CytoscapeService>();
 builder.Services.AddSingleton<OpenRouterService>();

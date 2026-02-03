@@ -4,6 +4,7 @@
 @inject OpenRouterService OpenRouterService
 @inject LocalStorageAuthProvider AuthProvider
 @inject ThemeService ThemeService
+@inject LocalStorageTheme LocalStorageTheme
 @inject IJSRuntime JS
 
 @inherits LayoutComponentBase
@@ -81,11 +82,18 @@
 @code {
     private string _componentKey = Guid.NewGuid().ToString();
     private bool _sidebarExpanded;
-    private string _currentTheme = "Standard-Dark";
+    private string _currentTheme = string.Empty;
     private bool showOverlay = true;
 
     protected override async Task OnInitializedAsync()
     {
+        _currentTheme = await LocalStorageTheme.GetTheme();
+        if(string.IsNullOrEmpty(_currentTheme))
+        {
+            _currentTheme = "Standard-Dark";
+            await LocalStorageTheme.SetTheme(_currentTheme);
+        }
+
         ThemeService.SetTheme(_currentTheme);
         await JS.InvokeVoidAsync("setTheme", _currentTheme);
         StateHasChanged();
@@ -115,9 +123,10 @@
 
     private async Task ToggleThemeAsync()
     {
-        _currentTheme = (_currentTheme == "Software") ? "Standard-Dark" : "Software";
+        _currentTheme = _currentTheme.ToLower().Contains("dark") ? "Software" : "Standard-Dark";
         ThemeService.SetTheme(_currentTheme);
         await JS.InvokeVoidAsync("setTheme", _currentTheme);
+        await LocalStorageTheme.SetTheme(_currentTheme);
 
         StateHasChanged();
     }
