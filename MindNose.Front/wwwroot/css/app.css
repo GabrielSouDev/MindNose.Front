@@ -1,6 +1,6 @@
-
-
-
+body {
+    background-image: none !important;
+}
 
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -285,3 +285,45 @@ a, .btn-link {
         transform: translateY(-2px);
         box-shadow: 0 6px 10px rgba(0,0,0,0.15);
     }
+
+/* ===================================== */
+/* =============== Menu ================ */
+/* ===================================== */
+
+.main-menu {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.main-menu .rz-menuitem {
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.main-menu .rz-menuitem-link {
+    color: inherit;
+}
+
+.main-menu .rz-menuitem:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.main-menu .rz-menuitem-active {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.main-menu .rz-menuitem-active .rz-menuitem-link {
+    color: white;
+}
+
+.menu-separator {
+    width: 1px;
+    height: 28px;
+    background-color: rgba(255, 255, 255, 0.2);
+    margin: 0 12px;
+    pointer-events: none;
+}

@@ -23,38 +23,42 @@
         <RadzenHeader Style="height: 60px; padding: 10px 25px; margin-bottom: 5px;">
             <AuthorizeView>
                 <Authorized>
-                    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center" Gap="1rem">
-                        <div style="display:flex; flex-direction: row; align-content:center; align-items:center; text-align:center; gap:50px;">
+                    <div style="height: 100%; width: 100%; display: flex; align-items: center; justify-content: space-between;">
+
+                        <!-- Esquerda -->
+                        <div style="display:flex; align-items:center; gap:50px;">
                             <RadzenLabel @onclick="@(() => NavigationManager.NavigateTo("/"))"
                                          Style="font-size: 42px; font-weight: 400; cursor:pointer;"
                                          Text="MindNose" />
-
                             <NavMenu />
                         </div>
 
-                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Wrap="FlexWrap.NoWrap">
+                        <!-- Direita -->
+                        <div style="display:flex; align-items:center; gap:12px;">
                             <RadzenButton Icon="Light" Variant="Variant.Flat" Click="ToggleTheme"
                                           Style="width:40px; height:40px; border-radius:50%; text-align:center;" />
-
                             <RadzenButton Text="Sair" Icon="logout" Click="LogOutAsync"
                                           Style="font-weight: bold; padding: 10px 25px; border-radius: 25px; border: none;
-                                             box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.2s, box-shadow 0.2s;" />
-                        </RadzenStack>
-                    </RadzenStack>
+                                             box-shadow: 0 4px 15px rgba(0,0,0,0.2);" />
+                        </div>
+
+                    </div>
                 </Authorized>
 
                 <NotAuthorized>
-                    <div style="position: relative; width: 100%; height: 100%; display: flex; align-items: center;">
+                    <div style="height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; position: relative;">
                         <RadzenLabel @onclick="@(() => NavigationManager.NavigateTo("/"))"
-                                     Style="font-size: 48px; font-weight: 400; cursor:pointer; position: absolute; left: 50%; transform: translateX(-50%); text-align:center;"
+                                     Style="font-size: 48px; font-weight: 400; cursor:pointer;"
                                      Text="MindNose" />
 
                         <RadzenButton Icon="Light" Variant="Variant.Flat" Click="ToggleTheme"
-                                      Style="margin-left: auto; width:40px; height:40px; border-radius:50%; text-align:center;" />
+                                      Style="position:absolute; right:25px; width:40px; height:40px; border-radius:50%; text-align:center;" />
                     </div>
                 </NotAuthorized>
             </AuthorizeView>
         </RadzenHeader>
+
+
 
         <RadzenBody Style="height: 98vh; display: flex; flex-direction: column;" @key="_componentKey">
             @Body

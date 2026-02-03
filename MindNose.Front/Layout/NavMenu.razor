@@ -1,11 +1,11 @@
-﻿<RadzenMenu Style="flex-direction: row;">
+﻿<RadzenMenu Class="main-menu">
     <RadzenMenuItem Text="Inicio" Path="/" Match="NavLinkMatch.All" />
     <RadzenMenuItem Text="Grafico de Similaridade" Path="/grafico-de-similaridade" />
     <RadzenMenuItem Text="Sobre" Path="/sobre" />
 
     <AuthorizeView Roles="@Role.Admin">
         <Authorized>
-            <RadzenMenuItem Style="margin-left: 100px;" />
+            <div class="menu-separator"></div>
             <RadzenMenuItem Text="Tabela de Modelos" Path="/tabela-de-modelos" />
             <RadzenMenuItem Text="Painel Administrativo" Path="/painel-administrativo" />
         </Authorized>
