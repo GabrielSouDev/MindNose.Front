@@ -11,10 +11,27 @@
     <RadzenStack style="min-height: fit-content;">
         <RadzenRow style="min-height: fit-content;">
             <RadzenColumn Size="12" SizeLG="12" style="min-height: fit-content;">
-                <h2>Grafico de Similaridade</h2>
-                @foreach (var chartElements in _chartTables)
+                <RadzenText TextAlign="TextAlign.Center" TextStyle="TextStyle.H5">Grafico de Similaridade</RadzenText>
+                @if(!_elements.Nodes.Any())
                 {
-                    <SimilarityGraph ChartTable="chartElements" />
+                    <RadzenCard Style="margin-top:20px; text-align:center; padding:30px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+                        <div style="display:flex;
+                                    align-items:center;
+                                    justify-content:center;
+                                    gap:10px;
+                                    margin-bottom:10px;">
+                            <RadzenIcon Icon="info" Style="font-size:36px; color:#007bff; line-height:1;" />
+                            <RadzenText Text="Não há elementos explorados para visualização!" TextStyle="TextStyle.H6" Style="font-weight:500; margin:0; line-height:1.2;" />
+                        </div>
+
+                        <RadzenButton Text="Voltar para a página inicial" Icon="home" Click="@(() => NavigationManager.NavigateTo("/"))" Style="padding:12px 24px; border-radius:25px; font-weight:bold;" /> 
+                    </RadzenCard>
+                }else
+                {
+                    @foreach (var chartElements in _chartTables)
+                    {
+                        <SimilarityGraph ChartTable="chartElements" />
+                    }
                 }
             </RadzenColumn>
         </RadzenRow>
