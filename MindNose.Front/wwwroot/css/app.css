@@ -1,3 +1,4 @@
+/* base */
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
@@ -17,7 +18,7 @@ a, .btn-link {
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 .content {
@@ -55,10 +56,7 @@ a, .btn-link {
     top: 0.5rem;
 }
 
-/* ===================================== */
-/* ======== LOADING SCREEN FINAL ======= */
-/* ===================================== */
-
+/* loading */
 .loading-progress {
     position: relative;
     display: flex;
@@ -116,9 +114,7 @@ a, .btn-link {
     margin-bottom: 0.25rem;
 }
 
-/* ===================================== */
-/* ============ Dots STYLE ============= */
-/* ===================================== */
+/* dots */
 .loading-center .dots::after {
     content: "";
     display: inline-block;
@@ -127,11 +123,25 @@ a, .btn-link {
 }
 
 @keyframes dots {
-    0%   { content: ""; }
-    25%  { content: "."; }
-    50%  { content: ".."; }
-    75%  { content: "..."; }
-    100% { content: ""; }
+    0% {
+        content: "";
+    }
+
+    25% {
+        content: ".";
+    }
+
+    50% {
+        content: "..";
+    }
+
+    75% {
+        content: "...";
+    }
+
+    100% {
+        content: "";
+    }
 }
 
 .loading-center .percent {
@@ -144,10 +154,7 @@ a, .btn-link {
     content: var(--blazor-load-percentage-text, "0%");
 }
 
-/* ===================================== */
-/* =========== TIPPY STYLE ============= */
-/* ===================================== */
-
+/* tippy */
 .tippy-box {
     font-family: 'Segoe UI', Arial, sans-serif;
     font-size: 16px;
@@ -163,10 +170,7 @@ a, .btn-link {
     color: #333;
 }
 
-/* ===================================== */
-/* =========== Typing STYLE ============ */
-/* ===================================== */
-
+/* typing */
 .typing {
     display: inline-block;
     overflow: hidden;
@@ -201,7 +205,7 @@ a, .btn-link {
     white-space: pre-wrap;
 }
 
-/* Títulos com menos margem */
+/* chat titles */
 .chat h1, .chat h2, .chat h3 {
     margin-top: 0;
     margin-bottom: 0;
@@ -210,18 +214,18 @@ a, .btn-link {
     line-height: 1.2;
 }
 
-/* Parágrafos mais compactos */
+/* chat paragraphs */
 .chat p {
     margin: 0;
 }
 
-/* Listas mais enxutas */
+/* chat lists */
 .chat ul, .chat ol {
     margin: 0.3em 0 0.3em 1.2em;
     padding: 0;
 }
 
-/* Negrito e itálico */
+/* chat emphasis */
 .chat strong {
     font-weight: bold;
 }
@@ -230,16 +234,13 @@ a, .btn-link {
     font-style: italic;
 }
 
-/* Links */
+/* chat links */
 .chat a {
     color: #4a00e0;
     text-decoration: underline;
 }
 
-/* ===================================== */
-/* ============== Overlay ============== */
-/* ===================================== */
-
+/* overlay */
 .full-screen-overlay {
     position: fixed;
     top: 0;
@@ -263,8 +264,7 @@ a, .btn-link {
     cursor: pointer;
 }
 
-/*Logout button*/
-
+/* logout button */
 .btn-logout {
     background-color: #e74c3c;
     color: white;
@@ -275,17 +275,14 @@ a, .btn-link {
     transition: all 0.2s ease-in-out;
 }
 
-    .btn-logout:hover {
-        background-color: #c0392b;
-        cursor: pointer;
-        transform: translateY(-2px);
-        box-shadow: 0 6px 10px rgba(0,0,0,0.15);
-    }
+.btn-logout:hover {
+    background-color: #c0392b;
+    cursor: pointer;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+}
 
-/* ===================================== */
-/* =============== Menu ================ */
-/* ===================================== */
-
+/* menu */
 .main-menu {
     display: flex;
     align-items: center;
