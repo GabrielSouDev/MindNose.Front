@@ -1,4 +1,4 @@
-﻿using MindNose.Front.Models.Chat;
+﻿using MindNose.Front.Models.Request.Chat;
 using MindNose.Front.Models.Request.User;
 using MindNose.Front.Models.Response;
 using MindNose.Front.Models.Response.CytoscapeDTO;
