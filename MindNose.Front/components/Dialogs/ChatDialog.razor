@@ -30,10 +30,10 @@
                 @if (message.Origin == ChatOrigin.System)
                 {
                     <div style="width: 100%; display: flex; justify-content: flex-start;">
-                        <div style="background-color: darkgrey; color: black;
-                                            width: fit-content; max-width: 90%;
-                                            text-align: start; padding: 8px;
-                                            border-radius: 10px; margin: 4px;">
+                        <div style="width: fit-content; max-width: 90%;
+                                    text-align: start; padding: 8px;
+                                    border-radius: 10px; margin: 4px;"
+                                    class="chat-bubble">
                             <p class="chat" style="margin: 0; white-space: pre-wrap;">
                                 @((MarkupString)message.Text!)
                             </p>
@@ -44,10 +44,10 @@
                 else
                 {
                     <div style="width: 100%; display: flex; justify-content: flex-end;">
-                        <div style="background-color: darkgray; color: black;
-                                            width: fit-content; max-width: 90%;
-                                            text-align: end; padding: 8px;
-                                            border-radius: 10px; margin: 4px;">
+                        <div style="width: fit-content; max-width: 90%;
+                                    text-align: end; padding: 8px;
+                                    border-radius: 10px; margin: 4px;"
+                                    class="chat-bubble">
                             <p class="chat" style="margin: 0; white-space: pre-wrap;">
                                 @message.Text
                             </p>
@@ -61,30 +61,31 @@
         <!-- Configurações -->
         <div style="padding: 10px; border-top: 1px solid #ccc;">
 
-            <!-- Modelo -->
             <RadzenStack Orientation="Orientation.Horizontal"
                          AlignItems="AlignItems.Center"
-                         Style="width:100%; margin-bottom: 8px;">
+                         Style="width:100%; margin-bottom: 8px; overflow: visible; position: relative;">
                 <RadzenLabel Style="width:fit-content; white-space: nowrap;" Text="Modelo:" />
                 <RadzenDropDown @bind-Value="_selectedModelId"
                                 Data="_modelsChat"
                                 TextProperty="@nameof(ChatModel.Name)"
                                 ValueProperty="@nameof(ChatModel.Id)"
-                                Style="width: 100%;" />
+                                Style="width: 100%;"
+                                PopupStyle="top: auto; bottom: 100%; max-height: 250px; overflow-y: auto;" />
             </RadzenStack>
 
-            <!-- Tipo de Saída -->
             <RadzenStack Orientation="Orientation.Horizontal"
                          AlignItems="AlignItems.Center"
-                         Style="width:100%; margin-bottom: 8px;">
+                         Style="width:100%; margin-bottom: 8px; overflow: visible; position: relative;">
                 <RadzenLabel Style="width:fit-content; white-space: nowrap;" Text="Tipo de saída:" />
                 <RadzenDropDown @bind-Value="_outputModeSelected"
                                 Data="_outputModeList"
                                 Placeholder="Modo de saída"
                                 TextProperty="Text"
                                 ValueProperty="Value"
-                                Style="width: 100%;" />
+                                Style="width: 100%;"
+                                PopupStyle="top: auto; bottom: 100%; max-height: 250px; overflow-y: auto;" />
             </RadzenStack>
+
 
             <!-- Botão Elementos -->
             <div style="display: flex; justify-content: flex-end; padding: 6px 0;">

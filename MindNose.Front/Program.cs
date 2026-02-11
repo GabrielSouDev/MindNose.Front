@@ -27,7 +27,7 @@ builder.Services.AddRadzenComponents();
 
 builder.Services.AddHttpClient("ApiClient", client =>
 {
-    client.BaseAddress = new Uri("https://api.mindnose.cloud/");
+    client.BaseAddress = new Uri("http://localhost:8080/");
 })
 .AddHttpMessageHandler<JwtAuthorizationMessageHandler>();
 

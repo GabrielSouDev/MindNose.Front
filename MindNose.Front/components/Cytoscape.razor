@@ -6,18 +6,25 @@
 @inject MindNoseApiService MindNoseService
 
 <RadzenStack Style="height: 100%; margin: 10px;">
-	<RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Wrap="FlexWrap.NoWrap">
-		<RadzenLabel Style="width:fit-content; white-space: nowrap;" Text="Categoria: " />
-		<RadzenDropDown @bind-Value="@_category"
-						Data="@_categories"
-						TextProperty="@nameof(CategoryResponse.Title)"
-						ValueProperty="@nameof(CategoryResponse.Title)" />
-		<RadzenLabel Text="Termo: " />
-		<RadzenTextBox Value="@_term" @oninput="e => _term = e.Value?.ToString()"
-					   @onkeyup="HandleKeyUp" />
+	@if (!string.IsNullOrEmpty(_category))
+	{
+		<RadzenStack Orientation="Orientation.Horizontal"
+					 AlignItems="AlignItems.Center"
+					 Wrap="FlexWrap.NoWrap"
+					 Style="overflow: visible; position: relative;">
+			<RadzenLabel Style="width:fit-content; white-space: nowrap;" Text="Categoria: " />
+			<RadzenDropDown @bind-Value="@_category"
+							Data="@_categories"
+							TextProperty="@nameof(CategoryResponse.Title)"
+							ValueProperty="@nameof(CategoryResponse.TitleId)" />
+			<RadzenLabel Text="Termo: " />
+			<RadzenTextBox Value="@_term"
+						   @oninput="e => _term = e.Value?.ToString()"
+						   @onkeyup="HandleKeyUp" />
+			<RadzenButton Icon="Search" Click="@(() => Search(null))" />
+		</RadzenStack>
 
-		<RadzenButton Icon="Search" Click="@(() => Search(null))" />
-	</RadzenStack>
+	}
 
 	<div @oncontextmenu:preventDefault id="@Id" style="width:100%; height: 100%; border: 1px solid #ccc">
 		<div style="
@@ -66,7 +73,11 @@
 	{
 		_layout = CytoscapeService.GetLayout();
 		_categories = CytoscapeService.GetCategories();
-		_category = _categories.First().Title;
+
+		var fistCategory = _categories.FirstOrDefault();
+		_category = fistCategory is null 
+			? string.Empty 
+			: fistCategory.TitleId;
 	}
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
