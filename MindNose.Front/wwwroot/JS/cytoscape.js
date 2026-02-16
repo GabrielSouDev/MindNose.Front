@@ -126,9 +126,12 @@ class CytoscapeGraph {
         this.cy._tippies = [];
 
         this.cy.nodes().forEach(node => {
-            const content = node.data().extra?.Summary ?? '(sem resumo)';
+            const rawContent = node.data().extra?.Summary ?? '(sem resumo)'; 
+            const content = rawContent.replace(/\n/g, '<br><br>');
+
             const tip = tippy(this.cy.container(), {
                 content,
+                allowHTML: true,
                 trigger: 'manual',
                 placement: 'top',
                 hideOnClick: false,
