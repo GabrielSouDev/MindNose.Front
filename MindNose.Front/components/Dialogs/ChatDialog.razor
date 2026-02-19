@@ -111,11 +111,11 @@
 
 
 @code{
-	private bool _selectedElementsHidden = true;
-	private List<ChatModel> _modelsChat = new();
-	private ConversationGuide _chatMessage = new();
-	private string _selectedModelId = string.Empty;
-	private Message _textBox = new()
+    private bool _selectedElementsHidden = true;
+    private List<ChatModel> _modelsChat = new();
+    private ConversationGuide _chatMessage = new();
+    private string _selectedModelId = string.Empty;
+    private Message _textBox = new()
 	{
 		Text = string.Empty,
 		Origin = ChatOrigin.User
@@ -136,48 +136,50 @@
     };
 
 
-	protected override void OnParametersSet()
-	{
-		var models = OpenRouterService.GetChatModels();
-		if (models?.Data != null && models.Data.Any())
-		{
-			_modelsChat = models.Data.Select(m => new ChatModel(m.Id, m.Name)).OrderBy(m => m.Name).ToList();
+    protected override void OnParametersSet()
+    {
+        var models = OpenRouterService.GetChatModels();
+        if (models?.Data != null && models.Data.Any())
+        {
+            _modelsChat = models.Data.Select(m => new ChatModel(m.Id, m.Name)).OrderBy(m => m.Name).ToList();
 
-			var model = _modelsChat.FirstOrDefault(m => m.Id == "mistralai/mistral-small-3.2-24b-instruct");
-			if (model is not null)
-			{
-				_selectedModelId = model.Id;
-			}
-			else
-				_selectedModelId = _modelsChat.First().Id;
+            var model = _modelsChat.FirstOrDefault(m => m.Id == "mistralai/mistral-small-3.2-24b-instruct");
+            if (model is not null)
+            {
+                _selectedModelId = model.Id;
+            }
+            else
+                _selectedModelId = _modelsChat.First().Id;
 
-		}
-	}
+        }
+    }
 
-	protected override void OnInitialized()
-	{
-		_chatMessage.Messages.Add(new Message { Text = "Bem-vindo ao MindNose!" });
-		_chatMessage.Messages.Add(new Message { Text = "Digite sua dúvida." });
+    protected override void OnInitialized()
+    {
+        _chatMessage.Messages.Add(new Message { Text = "Bem-vindo ao MindNose!" });
+        _chatMessage.Messages.Add(new Message { Text = "Digite sua dúvida." });
 
-		StateHasChanged();
-	}
+        StateHasChanged();
+    }
 
-	private async Task SubmitAsync()
-	{
-		if(!string.IsNullOrEmpty(_textBox.Text))
-			_chatMessage.Messages.Add(new Message { Text = _textBox.Text, Origin = ChatOrigin.User });
+    private async Task SubmitAsync()
+    {
+        if (string.IsNullOrEmpty(_textBox.Text?.Trim())) return;
+
+        var newMessage = new Message { Text = _textBox.Text, Origin = ChatOrigin.User };
+		_textBox.Text = string.Empty;
+
+        _chatMessage.Messages.Add(newMessage);
 
 		var selectedElementsHeader = CytoscapeService.GetSelectedElementsHeader();
 
 		var request = new ChatRequest
 			{
 				ElementsHeader = selectedElementsHeader,
-				Message = _textBox,
+                Message = newMessage,
                 OutputMode = _outputModeSelected,
 				Model = _selectedModelId
 			};
-
-		_textBox.Text = string.Empty;
 
 		_chatMessage.Messages.Add(new Message { Text = "Pensando..", Origin = ChatOrigin.System });
 
@@ -194,6 +196,7 @@
 		if (args.Key == "Enter" && !args.ShiftKey)
 		{
 			await SubmitAsync();
+            _textBox.Text = string.Empty;
 		}
 	}
 
