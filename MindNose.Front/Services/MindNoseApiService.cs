@@ -1,6 +1,8 @@
-﻿using MindNose.Front.Models.Request.Chat;
+﻿using MindNose.Front.Models.Chat;
+using MindNose.Front.Models.Request.Chat;
 using MindNose.Front.Models.Request.User;
 using MindNose.Front.Models.Response;
+using MindNose.Front.Models.Response.ConversationGuideDTO;
 using MindNose.Front.Models.Response.CytoscapeDTO;
 using MindNose.Front.Models.Response.LLMModels;
 using MindNose.Front.Models.Response.User;
@@ -68,13 +70,54 @@ public class MindNoseApiService
         else
             throw new HttpRequestException("Falha ao Criar/Obter Link! => api/MindNoseCore/GetOrCreateLink");
     }
+    public async Task<List<ConversationGuideDisplay>?> GetGuideListAsync()
+    {
+        var response = await _httpClient.GetAsync("api/Chat/GetList");
 
-    public async Task<string> SendChatAsync(ChatRequest request)
+        if (!response.IsSuccessStatusCode)
+            throw new HttpRequestException($"Falha ao obter Models pela API! => api/Chat/GetList");
+
+        var guide = await response.Content.ReadFromJsonAsync<List<ConversationGuideDisplay>?>();
+
+        return guide;
+    }
+
+    public async Task<ConversationGuideDTO> NewChatGuideAsync()
+    {
+        var response = await _httpClient.PostAsync("api/Chat/New", null);
+
+        if (!response.IsSuccessStatusCode)
+            throw new HttpRequestException($"Falha ao obter Models pela API! => api/Chat/New");
+
+        var guide = await response.Content.ReadFromJsonAsync<ConversationGuideDTO>();
+
+        if (guide is null) throw new NullReferenceException("ConversationGuide nulo!");
+
+        return guide;
+    }
+
+    public async Task<ConversationGuideDTO> GetChatGuideAsync(Guid id)
+    {
+        var guide = await _httpClient.GetFromJsonAsync<ConversationGuideDTO>($"api/Chat/Open/{id}")
+        ?? throw new HttpRequestException("Falha ao obter Models pela API! => api/Chat/Open");
+
+        return guide;
+    }
+
+    public async Task<bool> DeleteChatGuideAsync(Guid id)
+    {
+        var response = await _httpClient.DeleteAsync($"api/Chat/Delete/{id}")
+        ?? throw new HttpRequestException("Falha ao obter Models pela API! => api/Chat/Delete");
+
+        return response.IsSuccessStatusCode;
+    }
+
+    public async Task<string> SendChatAsync(MessageRequest request)
     {
         var json = JsonConvert.SerializeObject(request);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        var response = await _httpClient.PostAsync("api/MindNoseCore/SendAIChat", content);
+        var response = await _httpClient.PostAsync("api/Chat/SendAIMessage", content);
 
         if (response.IsSuccessStatusCode)
         {
@@ -83,7 +126,7 @@ public class MindNoseApiService
             return responseContent;
         }
         else
-            throw new HttpRequestException("Falha ao enviar Prompt! => api/MindNoseCore/SendAIChat");
+            throw new HttpRequestException("Falha ao enviar Prompt! => api/Chat/SendAIMessage");
     }
 
     private async Task<ModelResponse> GetModels()

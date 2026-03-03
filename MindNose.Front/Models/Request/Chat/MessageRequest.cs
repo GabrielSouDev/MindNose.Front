@@ -3,8 +3,9 @@ using MindNose.Front.Models.Enum;
 
 namespace MindNose.Front.Models.Request.Chat;
 
-public class ChatRequest
+public class MessageRequest
 {
+    public Guid ConversationGuideId { get; set; }
     public List<ElementHeader>? ElementsHeader { get; set; } = new();
     public Message Message { get; set; } = new();
     public OutputMode OutputMode { get; set; } = OutputMode.Conversational;

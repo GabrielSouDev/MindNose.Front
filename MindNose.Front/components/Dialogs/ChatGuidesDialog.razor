@@ -1,0 +1,89 @@
+@inject MindNoseApiService MindNoseService
+
+@if (_chatIsOpen)
+{
+    <Chat Guide="_selectedChat"></Chat>
+}
+else
+{
+    <RadzenStack Style="height: 100%; width: 100%; display: flex; flex-direction: column;">
+        <RadzenCard Style="flex: 1; overflow-y: auto;">
+
+            <RadzenCard Style="width: 100; text-align:center; justify-content:center;">
+                <RadzenButton Style="border-radius:25px;" Click="NewChatAsync">
+                    <h5>Novo Chat</h5>
+                </RadzenButton>
+            </RadzenCard>
+
+            @if (_chatGuides is not null && _chatGuides.Any())
+            {
+                @foreach (var chatGuide in _chatGuides)
+                {
+                    <RadzenCard Style="width: 100%; display:flex; flex-direction:column; text-align:center; justify-content:center;" >
+                        <h6 style="cursor: pointer;" @onclick="() => OpenChatAsync(chatGuide.Id)">@chatGuide.Id</h6>
+
+                        <div style="display:flex; justify-content:flex-end; width:100%;" >
+                            <RadzenButton Text="Deletar" Style="margin-top:8px; border-radius: 25px;" Click="() => DeleteChatAsync(chatGuide.Id)" />
+                        </div>
+                    </RadzenCard>
+                }
+            }
+            else
+            {
+                <RadzenCard Style="width: 100; text-align:center; justify-content:center;" >
+                    <h6>Não há conversas anteriores.</h6>
+                </RadzenCard>
+            }
+        </RadzenCard>
+    </RadzenStack>
+}
+
+@code{
+    private List<ConversationGuideDisplay>? _chatGuides;
+    private bool _chatIsOpen = false;
+    private ConversationGuideDTO? _selectedChat { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _chatIsOpen = false;
+        _selectedChat = default;
+        _chatGuides = await MindNoseService.GetGuideListAsync();
+    }
+
+    private async Task NewChatAsync(MouseEventArgs args)
+    {
+        _selectedChat = await MindNoseService.NewChatGuideAsync();
+        _chatIsOpen = true;
+        StateHasChanged();
+    }
+
+    private async Task OpenChatAsync(Guid id)
+    {
+        _selectedChat = await MindNoseService.GetChatGuideAsync(id);
+        if (_selectedChat.Messages.Any())
+        {
+            foreach (var msg in _selectedChat.Messages) 
+            { 
+                if (msg.Origin == MessageOrigin.System && !string.IsNullOrEmpty(msg.Text)) 
+                { 
+                    msg.Text = Markdown.ToHtml(msg.Text); 
+                } 
+            }
+        }
+
+        _chatIsOpen = true;
+        StateHasChanged();
+    }
+
+    private async Task DeleteChatAsync(Guid id)
+    {
+        var sucess = await MindNoseService.DeleteChatGuideAsync(id);
+
+        if(sucess)
+        {
+            var guide = _chatGuides.FirstOrDefault(c => c.Id == id);
+            _chatGuides.Remove(guide!);
+            StateHasChanged();
+        }
+    }
+}

@@ -116,7 +116,7 @@
                 Width = "33vw",
                 Height = "100%"
             };
-        await DialogService.OpenSideAsync<ChatDialog>("Chat", options: options);
+        await DialogService.OpenSideAsync<ChatGuidesDialog>("Chat", options: options);
 
         _componentKey = Guid.NewGuid().ToString();
     }
